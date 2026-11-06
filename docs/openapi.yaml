@@ -1,0 +1,739 @@
+openapi: 3.0.3
+info:
+  title: GDGoC UNSRI Management System REST API
+  description: |
+    Production-grade Back-End REST API for Google Developer Groups on Campus (GDGoC) Universitas Sriwijaya.
+    Features 3-tier Role-Based Access Control (LEAD, DIVISION_HEAD, MEMBER), pessimistic concurrency control for event registrations, idempotent attendance check-ins, security audit logging, and strict IDOR/mass-assignment safeguards.
+  version: 1.0.0
+  contact:
+    name: Davin Gabriel Jonathan
+    email: davin@gdgoc.unsri.ac.id
+
+servers:
+  - url: http://localhost:3000
+    description: Local Development Server
+
+paths:
+  # ================= AUTH =================
+  /api/auth/register:
+    post:
+      summary: Register a new member
+      description: Public registration endpoint. Always assigns role 'MEMBER'.
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        201:
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+        400:
+          $ref: '#/components/responses/ValidationError'
+        409:
+          $ref: '#/components/responses/ConflictError'
+
+  /api/auth/login:
+    post:
+      summary: Authenticate user
+      description: Validates credentials and returns JWT access and refresh tokens.
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        200:
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/auth/refresh:
+    post:
+      summary: Refresh access token
+      description: Reissues access and refresh tokens using a valid refresh token.
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        200:
+          description: Token reissued successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/auth/logout:
+    post:
+      summary: Logout user
+      tags: [Auth]
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Logged out successfully
+
+  /api/auth/me:
+    get:
+      summary: Get current authenticated user profile
+      tags: [Auth]
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ================= DIVISIONS =================
+  /api/divisions:
+    get:
+      summary: List all divisions
+      tags: [Divisions]
+      responses:
+        200:
+          description: List of active chapter divisions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Division'
+
+  # ================= MEMBERS =================
+  /api/members:
+    get:
+      summary: List members (Paginated, Searchable, Filterable)
+      tags: [Members]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 10 }
+        - in: query
+          name: search
+          schema: { type: string }
+          description: Search by name, email, or NIM
+        - in: query
+          name: role
+          schema: { type: string, enum: [LEAD, DIVISION_HEAD, MEMBER] }
+        - in: query
+          name: division_id
+          schema: { type: string, format: uuid }
+        - in: query
+          name: sort
+          schema: { type: string, enum: [name, email, role, created_at], default: created_at }
+        - in: query
+          name: order
+          schema: { type: string, enum: [asc, desc], default: desc }
+      responses:
+        200:
+          description: Paginated member list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMembersResponse'
+
+  /api/members/{id}:
+    get:
+      summary: Get member detail by ID
+      tags: [Members]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        200:
+          description: Member details
+        404:
+          $ref: '#/components/responses/NotFoundError'
+    put:
+      summary: Update member profile
+      description: IDOR protected. MEMBER can only update own profile. DIVISION_HEAD can only update members in own division. LEAD can update any.
+      tags: [Members]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMemberRequest'
+      responses:
+        200:
+          description: Member updated successfully
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      summary: Soft delete member (LEAD only)
+      tags: [Members]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        200:
+          description: Member deactivated
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+
+  /api/members/{id}/role:
+    patch:
+      summary: Change member role (LEAD only)
+      description: Modifies user role and generates an audit log.
+      tags: [Members]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role:
+                  type: string
+                  enum: [LEAD, DIVISION_HEAD, MEMBER]
+      responses:
+        200:
+          description: Role updated successfully
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+
+  # ================= EVENTS =================
+  /api/events:
+    get:
+      summary: List events (Paginated, Upcoming/Past, Searchable)
+      tags: [Events]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 10 }
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: upcoming
+          schema: { type: boolean }
+        - in: query
+          name: sort
+          schema: { type: string, enum: [title, start_time, created_at, quota] }
+        - in: query
+          name: order
+          schema: { type: string, enum: [asc, desc] }
+      responses:
+        200:
+          description: Events retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEventsResponse'
+
+    post:
+      summary: Create an event (LEAD & DIVISION_HEAD only)
+      tags: [Events]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        201:
+          description: Event created successfully
+        400:
+          $ref: '#/components/responses/ValidationError'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+
+  /api/events/{id}:
+    get:
+      summary: Get event detail with registration and remaining quota metrics
+      tags: [Events]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        200:
+          description: Event details
+        404:
+          $ref: '#/components/responses/NotFoundError'
+    put:
+      summary: Update event (LEAD or Event Creator)
+      tags: [Events]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        200:
+          description: Event updated
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+    delete:
+      summary: Delete event (LEAD or Event Creator)
+      tags: [Events]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        200:
+          description: Event deleted
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+
+  # ================= REGISTRATIONS =================
+  /api/events/{id}/register:
+    post:
+      summary: Register current user for an event (Pessimistic Locking Quota Enforcement)
+      description: Atomically checks quota with SELECT FOR UPDATE and verifies unique registration.
+      tags: [Registrations]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        201:
+          description: Registered successfully
+        400:
+          description: Event ended
+        409:
+          description: Event full or already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                event_full:
+                  value: { success: false, message: "Event registration quota is full.", code: "EVENT_FULL" }
+                already_registered:
+                  value: { success: false, message: "You are already registered for this event.", code: "ALREADY_REGISTERED" }
+
+    delete:
+      summary: Cancel registration for current user
+      tags: [Registrations]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        200:
+          description: Registration cancelled
+
+  /api/events/{id}/registrations:
+    get:
+      summary: List all registrations for an event (Leadership only)
+      tags: [Registrations]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        200:
+          description: Participant registration list
+
+  /api/registrations/my:
+    get:
+      summary: List current user's registered events
+      tags: [Registrations]
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: User registration list
+
+  # ================= ATTENDANCE =================
+  /api/events/{id}/checkin:
+    post:
+      summary: Check in attendance (Idempotent ON CONFLICT DO NOTHING)
+      description: Records attendance idempotently. Returns 200 whether first check-in or repeat attempt.
+      tags: [Attendances]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        200:
+          description: Attendance checked in successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendanceResponse'
+
+  /api/events/{id}/attendances:
+    get:
+      summary: List attendee check-ins for an event (Leadership only)
+      tags: [Attendances]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        200:
+          description: Attendance attendee list
+
+  /api/attendances/my:
+    get:
+      summary: List current user's attendance records
+      tags: [Attendances]
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: User attendance records
+
+  # ================= AUDIT LOGS =================
+  /api/audit-logs:
+    get:
+      summary: View security and administrative audit logs (LEAD only)
+      tags: [Audit Logs]
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: actor_id
+          schema: { type: string, format: uuid }
+        - in: query
+          name: action
+          schema: { type: string }
+        - in: query
+          name: target_table
+          schema: { type: string }
+      responses:
+        200:
+          description: Audit logs list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditLogsResponse'
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+
+# ================= COMPONENTS =================
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    ValidationError:
+      description: Input validation failed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success: { type: boolean, example: false }
+              message: { type: string, example: "Validation failed. Please check the provided inputs." }
+              code: { type: string, example: "VALIDATION_ERROR" }
+              errors:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field: { type: string }
+                    message: { type: string }
+
+    UnauthorizedError:
+      description: Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ForbiddenError:
+      description: Insufficient role permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ConflictError:
+      description: Resource conflict or duplicate
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        message: { type: string }
+        code: { type: string, nullable: true }
+
+    Division:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string, example: "Technology" }
+        description: { type: string }
+        created_at: { type: string, format: date-time }
+
+    RegisterRequest:
+      type: object
+      required: [email, password, name]
+      properties:
+        email: { type: string, format: email, example: "davin@gdgoc.unsri.ac.id" }
+        password: { type: string, minLength: 8, example: "Password123!" }
+        name: { type: string, example: "Davin Gabriel Jonathan" }
+        nim: { type: string, example: "09021282126045" }
+        phone: { type: string, example: "081234567890" }
+        division_id: { type: string, format: uuid }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email, example: "lead@gdgoc.unsri.ac.id" }
+        password: { type: string, example: "Password123!" }
+
+    TokenResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: object
+          properties:
+            accessToken: { type: string }
+            refreshToken: { type: string }
+
+    AuthSuccessResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            accessToken: { type: string }
+            refreshToken: { type: string }
+
+    UserProfileResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        name: { type: string }
+        role: { type: string, enum: [LEAD, DIVISION_HEAD, MEMBER] }
+        division_id: { type: string, format: uuid, nullable: true }
+        division_name: { type: string, nullable: true }
+        nim: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    UpdateMemberRequest:
+      type: object
+      properties:
+        name: { type: string }
+        phone: { type: string }
+        nim: { type: string }
+        division_id: { type: string, format: uuid }
+
+    CreateEventRequest:
+      type: object
+      required: [title, quota, start_time, end_time]
+      properties:
+        title: { type: string, example: "Google Cloud & Generative AI Workshop" }
+        description: { type: string }
+        quota: { type: integer, minimum: 1, example: 50 }
+        start_time: { type: string, format: date-time }
+        end_time: { type: string, format: date-time }
+        location: { type: string, example: "Auditorium Pascasarjana UNSRI" }
+
+    AttendanceResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: object
+          properties:
+            id: { type: string, format: uuid }
+            user_id: { type: string, format: uuid }
+            event_id: { type: string, format: uuid }
+            checked_in_at: { type: string, format: date-time }
+            alreadyCheckedIn: { type: boolean, example: false }
+            message: { type: string, example: "Check-in successful! Attendance recorded." }
+
+    PaginatedMembersResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        meta:
+          type: object
+          properties:
+            total: { type: integer }
+            page: { type: integer }
+            limit: { type: integer }
+            totalPages: { type: integer }
+
+    PaginatedEventsResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, format: uuid }
+              title: { type: string }
+              description: { type: string }
+              quota: { type: integer }
+              start_time: { type: string, format: date-time }
+              end_time: { type: string, format: date-time }
+              location: { type: string }
+              registered_count: { type: integer }
+              remaining_quota: { type: integer }
+        meta:
+          type: object
+          properties:
+            total: { type: integer }
+            page: { type: integer }
+            limit: { type: integer }
+            totalPages: { type: integer }
+
+    PaginatedAuditLogsResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string, format: uuid }
+              actor_id: { type: string, format: uuid }
+              actor_name: { type: string }
+              actor_email: { type: string }
+              target_id: { type: string, format: uuid }
+              target_table: { type: string }
+              action: { type: string }
+              old_value: { type: object, nullable: true }
+              new_value: { type: object, nullable: true }
+              ip_address: { type: string }
+              created_at: { type: string, format: date-time }
+        meta:
+          type: object
+          properties:
+            total: { type: integer }
+            page: { type: integer }
+            limit: { type: integer }
+            totalPages: { type: integer }
