@@ -1,0 +1,82 @@
+/**
+ * @file app.js
+ * @description Express application configuration with security middleware,
+ * route mounts, and centralized error handling.
+ */
+
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const env = require('./config/env');
+const { apiLimiter } = require('./middleware/rateLimiter');
+const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
+
+// Route Handlers
+const authRouter = require('./modules/auth/auth.router');
+const membersRouter = require('./modules/members/members.router');
+const eventsRouter = require('./modules/events/events.router');
+const registrationsRouter = require('./modules/registrations/registrations.router');
+const attendancesRouter = require('./modules/attendances/attendances.router');
+const auditLogsRouter = require('./modules/audit-logs/audit-logs.router');
+const divisionsRouter = require('./modules/divisions/divisions.router');
+
+const app = express();
+
+// Security HTTP headers
+app.use(helmet());
+
+// CORS configuration
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server) or matching configured frontend
+      if (!origin || origin === env.FRONTEND_URL || env.NODE_ENV !== 'production') {
+        callback(null, true);
+      } else {
+        callback(new Error('Blocked by CORS policy'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
+
+// Request logging (silent during tests)
+if (env.NODE_ENV !== 'test') {
+  app.use(morgan('dev'));
+}
+
+// Body parsing with strict size limits to prevent body-inflation DoS
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// Global API rate limiter
+app.use('/api', apiLimiter);
+
+// Liveness / health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Mount application API modules
+app.use('/api/auth', authRouter);
+app.use('/api/members', membersRouter);
+app.use('/api/events', eventsRouter);
+app.use('/api/registrations', registrationsRouter);
+app.use('/api/attendances', attendancesRouter);
+app.use('/api/audit-logs', auditLogsRouter);
+app.use('/api/divisions', divisionsRouter);
+
+// Handle 404 routes
+app.use(notFoundHandler);
+
+// Centralized error handling middleware
+app.use(errorHandler);
+
+module.exports = app;
