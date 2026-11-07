@@ -8,6 +8,8 @@ const membersRepository = require('./members.repository');
 const { hashPassword } = require('../../utils/password');
 const { createAuditLog } = require('../../utils/auditLogger');
 
+const isLeader = (role) => role === 'LEAD' || role === 'CO_LEAD';
+
 /**
  * Retrieve paginated list of members.
  */
@@ -16,15 +18,15 @@ const getMembers = async (queryOptions) => {
 };
 
 /**
- * Create a new member (LEAD only).
+ * Create a new member (LEAD and CO_LEAD).
  */
 const createMember = async (
   { name, email, password, role = 'MEMBER', division_id = null, nim = null, phone = null },
   currentUser,
   ipAddress = null
 ) => {
-  if (currentUser.role !== 'LEAD') {
-    const err = new Error('Forbidden: Only LEAD can create member accounts directly.');
+  if (!isLeader(currentUser.role)) {
+    const err = new Error('Forbidden: Only chapter leadership can create member accounts directly.');
     err.statusCode = 403;
     err.code = 'FORBIDDEN';
     throw err;
@@ -116,9 +118,9 @@ const updateProfile = async (targetId, fields, currentUser) => {
     }
   }
 
-  // Only LEAD can change division_id of other users or themselves
+  // Only LEAD or CO_LEAD can change division_id of other users or themselves
   const sanitizedFields = { ...fields };
-  if (currentUser.role !== 'LEAD') {
+  if (!isLeader(currentUser.role)) {
     delete sanitizedFields.division_id;
   }
 
@@ -127,12 +129,12 @@ const updateProfile = async (targetId, fields, currentUser) => {
 };
 
 /**
- * Update user role (LEAD only).
+ * Update user role (LEAD and CO_LEAD).
  * Automatically records a security audit log entry (ROLE_CHANGE).
  */
 const updateRole = async (targetId, newRole, currentUser, ipAddress = null) => {
-  if (currentUser.role !== 'LEAD') {
-    const err = new Error('Forbidden: Only LEAD can assign user roles.');
+  if (!isLeader(currentUser.role)) {
+    const err = new Error('Forbidden: Only chapter leadership can assign user roles.');
     err.statusCode = 403;
     err.code = 'FORBIDDEN';
     throw err;
@@ -151,7 +153,7 @@ const updateRole = async (targetId, newRole, currentUser, ipAddress = null) => {
     return targetUser;
   }
 
-  if (currentUser.id === targetId && newRole !== 'LEAD') {
+  if (currentUser.id === targetId && targetUser.role === 'LEAD' && newRole !== 'LEAD') {
     const err = new Error('Cannot demote your own LEAD account.');
     err.statusCode = 400;
     err.code = 'SELF_DEMOTION_DISALLOWED';
@@ -174,11 +176,11 @@ const updateRole = async (targetId, newRole, currentUser, ipAddress = null) => {
 };
 
 /**
- * Soft delete a member (LEAD only).
+ * Soft delete a member (LEAD and CO_LEAD).
  */
 const deleteMember = async (targetId, currentUser, ipAddress = null) => {
-  if (currentUser.role !== 'LEAD') {
-    const err = new Error('Forbidden: Only LEAD can deactivate accounts.');
+  if (!isLeader(currentUser.role)) {
+    const err = new Error('Forbidden: Only chapter leadership can deactivate accounts.');
     err.statusCode = 403;
     err.code = 'FORBIDDEN';
     throw err;

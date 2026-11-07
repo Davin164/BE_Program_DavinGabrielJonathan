@@ -24,10 +24,10 @@ router.use(authenticate);
 // List members (All authenticated roles)
 router.get('/', listMembersValidator, validate, membersController.list);
 
-// Create member (LEAD only)
+// Create member (LEAD and CO_LEAD)
 router.post(
   '/',
-  authorize('LEAD'),
+  authorize('LEAD', 'CO_LEAD'),
   createMemberValidator,
   validate,
   membersController.create
@@ -36,23 +36,23 @@ router.post(
 // Get single member (All authenticated roles)
 router.get('/:id', memberIdParamValidator, validate, membersController.getById);
 
-// Update member profile (Self, or authorized division head / lead)
+// Update member profile (Self, or authorized lead)
 router.put('/:id', updateProfileValidator, validate, membersController.update);
 router.patch('/:id', updateProfileValidator, validate, membersController.update);
 
-// Update member role (LEAD only)
+// Update member role (LEAD and CO_LEAD)
 router.patch(
   '/:id/role',
-  authorize('LEAD'),
+  authorize('LEAD', 'CO_LEAD'),
   updateRoleValidator,
   validate,
   membersController.updateRole
 );
 
-// Soft delete member (LEAD only)
+// Soft delete member (LEAD and CO_LEAD)
 router.delete(
   '/:id',
-  authorize('LEAD'),
+  authorize('LEAD', 'CO_LEAD'),
   memberIdParamValidator,
   validate,
   membersController.deleteMember

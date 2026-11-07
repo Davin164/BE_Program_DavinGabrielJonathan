@@ -1,5 +1,13 @@
 DO $$ BEGIN
-  CREATE TYPE user_role AS ENUM ('LEAD', 'DIVISION_HEAD', 'MEMBER');
+  CREATE TYPE user_role AS ENUM (
+    'LEAD',
+    'CO_LEAD',
+    'SECRETARY',
+    'TREASURER',
+    'TECHNICAL_DIVISION',
+    'NON_TECHNICAL_DIVISION',
+    'MEMBER'
+  );
 EXCEPTION
   WHEN duplicate_object THEN null;
 END $$;

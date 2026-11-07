@@ -19,15 +19,24 @@ const { authorize } = require('../../middleware/authorize');
 
 const router = Router();
 
+const CORE_ROLES = [
+  'LEAD',
+  'CO_LEAD',
+  'SECRETARY',
+  'TREASURER',
+  'TECHNICAL_DIVISION',
+  'NON_TECHNICAL_DIVISION',
+];
+
 // Public / Semi-public event exploration (optionalAuth identifies caller if logged in)
 router.get('/', optionalAuth, listEventsValidator, validate, eventsController.list);
 router.get('/:id', optionalAuth, eventIdParamValidator, validate, eventsController.getById);
 
-// Event lifecycle management (LEAD and DIVISION_HEAD only)
+// Event lifecycle management (Chapter leadership & core team)
 router.post(
   '/',
   authenticate,
-  authorize('LEAD', 'DIVISION_HEAD'),
+  authorize(...CORE_ROLES),
   createEventValidator,
   validate,
   eventsController.create
@@ -36,7 +45,7 @@ router.post(
 router.put(
   '/:id',
   authenticate,
-  authorize('LEAD', 'DIVISION_HEAD'),
+  authorize(...CORE_ROLES),
   updateEventValidator,
   validate,
   eventsController.update
@@ -45,7 +54,7 @@ router.put(
 router.delete(
   '/:id',
   authenticate,
-  authorize('LEAD', 'DIVISION_HEAD'),
+  authorize(...CORE_ROLES),
   eventIdParamValidator,
   validate,
   eventsController.deleteEvent
@@ -71,7 +80,7 @@ router.delete(
 router.get(
   '/:id/registrations',
   authenticate,
-  authorize('LEAD', 'DIVISION_HEAD'),
+  authorize(...CORE_ROLES),
   eventIdParamValidator,
   validate,
   registrationsController.getEventRegistrations
@@ -89,7 +98,7 @@ router.post(
 router.get(
   '/:id/attendances',
   authenticate,
-  authorize('LEAD', 'DIVISION_HEAD'),
+  authorize(...CORE_ROLES),
   eventIdParamValidator,
   validate,
   attendancesController.getEventAttendances

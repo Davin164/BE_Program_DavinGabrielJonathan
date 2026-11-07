@@ -7,8 +7,6 @@ CREATE TABLE IF NOT EXISTS divisions (
 
 INSERT INTO divisions (name) VALUES 
   ('Core Team'), 
-  ('Technology'), 
-  ('Design'), 
-  ('Marketing'), 
-  ('Event')
+  ('Technical Division'), 
+  ('Non-Technical Division')
 ON CONFLICT (name) DO NOTHING;

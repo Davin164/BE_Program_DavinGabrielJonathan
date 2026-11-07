@@ -71,7 +71,7 @@ const updateEvent = async (id, fields, currentUser) => {
     throw err;
   }
 
-  if (currentUser.role === 'DIVISION_HEAD' && existingEvent.created_by !== currentUser.id) {
+  if (currentUser.role !== 'LEAD' && existingEvent.created_by !== currentUser.id) {
     const err = new Error('Forbidden: You can only edit events created by yourself.');
     err.statusCode = 403;
     err.code = 'FORBIDDEN';
@@ -113,7 +113,7 @@ const deleteEvent = async (id, currentUser, ipAddress = null) => {
     throw err;
   }
 
-  if (currentUser.role === 'DIVISION_HEAD' && existingEvent.created_by !== currentUser.id) {
+  if (currentUser.role !== 'LEAD' && existingEvent.created_by !== currentUser.id) {
     const err = new Error('Forbidden: You can only delete events created by yourself.');
     err.statusCode = 403;
     err.code = 'FORBIDDEN';

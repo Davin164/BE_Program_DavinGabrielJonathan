@@ -19,7 +19,7 @@ describe('Events Module Tests', () => {
     const lead = await createTestUser({ role: 'LEAD', email: 'lead-events@test.com' });
     leadToken = lead.token;
 
-    const divHead = await createTestUser({ role: 'DIVISION_HEAD', email: 'divhead-events@test.com' });
+    const divHead = await createTestUser({ role: 'TECHNICAL_DIVISION', email: 'tech-events@test.com' });
     divHeadToken = divHead.token;
 
     const member = await createTestUser({ role: 'MEMBER', email: 'member-events@test.com' });
@@ -45,7 +45,7 @@ describe('Events Module Tests', () => {
       expect(res.status).toBe(403);
     });
 
-    it('should allow DIVISION_HEAD to create an event', async () => {
+    it('should allow TECHNICAL_DIVISION core member to create an event', async () => {
       const startTime = new Date(Date.now() + 86400000).toISOString();
       const endTime = new Date(Date.now() + 90000000).toISOString();
 

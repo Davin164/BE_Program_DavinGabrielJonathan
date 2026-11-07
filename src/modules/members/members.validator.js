@@ -5,6 +5,16 @@
 
 const { query, body, param } = require('express-validator');
 
+const VALID_ROLES = [
+  'LEAD',
+  'CO_LEAD',
+  'SECRETARY',
+  'TREASURER',
+  'TECHNICAL_DIVISION',
+  'NON_TECHNICAL_DIVISION',
+  'MEMBER',
+];
+
 const listMembersValidator = [
   query('page')
     .optional()
@@ -20,8 +30,8 @@ const listMembersValidator = [
     .trim(),
   query('role')
     .optional()
-    .isIn(['LEAD', 'DIVISION_HEAD', 'MEMBER'])
-    .withMessage('Role filter must be one of: LEAD, DIVISION_HEAD, MEMBER'),
+    .isIn(VALID_ROLES)
+    .withMessage(`Role filter must be one of: ${VALID_ROLES.join(', ')}`),
   query('division_id')
     .optional()
     .isUUID()
@@ -62,8 +72,8 @@ const createMemberValidator = [
     .withMessage('Password must be at least 6 characters'),
   body('role')
     .optional()
-    .isIn(['LEAD', 'DIVISION_HEAD', 'MEMBER'])
-    .withMessage('Role must be LEAD, DIVISION_HEAD, or MEMBER'),
+    .isIn(VALID_ROLES)
+    .withMessage(`Role must be one of: ${VALID_ROLES.join(', ')}`),
   body('division_id')
     .optional({ checkFalsy: true })
     .isUUID()
@@ -108,8 +118,8 @@ const updateRoleValidator = [
   body('role')
     .notEmpty()
     .withMessage('Role is required')
-    .isIn(['LEAD', 'DIVISION_HEAD', 'MEMBER'])
-    .withMessage('Role must be LEAD, DIVISION_HEAD, or MEMBER'),
+    .isIn(VALID_ROLES)
+    .withMessage(`Role must be one of: ${VALID_ROLES.join(', ')}`),
 ];
 
 module.exports = {

@@ -47,7 +47,7 @@ const cleanTestDb = async () => {
     `);
     // Ensure divisions exist
     await query(`
-      INSERT INTO divisions (name) VALUES ('Core Team'), ('Technology'), ('Design'), ('Marketing'), ('Event')
+      INSERT INTO divisions (name) VALUES ('Core Team'), ('Technical Division'), ('Non-Technical Division')
       ON CONFLICT (name) DO NOTHING;
     `);
   } catch (err) {

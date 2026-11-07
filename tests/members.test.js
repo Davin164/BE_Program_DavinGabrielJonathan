@@ -87,11 +87,11 @@ describe('Members Module & IDOR Security Tests', () => {
       const res = await request(app)
         .patch(`/api/members/${member2.id}/role`)
         .set('Authorization', `Bearer ${leadToken}`)
-        .send({ role: 'DIVISION_HEAD' });
+        .send({ role: 'TECHNICAL_DIVISION' });
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.role).toBe('DIVISION_HEAD');
+      expect(res.body.data.role).toBe('TECHNICAL_DIVISION');
 
       // Verify audit log entry was written
       const auditRes = await query(
@@ -99,7 +99,7 @@ describe('Members Module & IDOR Security Tests', () => {
         [member2.id]
       );
       expect(auditRes.rows.length).toBeGreaterThan(0);
-      expect(auditRes.rows[0].new_value.role).toBe('DIVISION_HEAD');
+      expect(auditRes.rows[0].new_value.role).toBe('TECHNICAL_DIVISION');
     });
 
     it('should allow LEAD to soft delete a member', async () => {

@@ -18,11 +18,9 @@ const seed = async () => {
     // 1. Ensure divisions exist
     const divisionsQuery = `
       INSERT INTO divisions (name, description) VALUES
-        ('Core Team', 'Strategic planning and overall chapter leadership'),
-        ('Technology', 'Technical workshops, software engineering, and open source projects'),
-        ('Design', 'UI/UX design, brand identity, and visual creative assets'),
-        ('Marketing', 'Social media, public relations, and community outreach'),
-        ('Event', 'Logistics, event management, and chapter operations')
+        ('Core Team', 'Strategic planning and chapter leadership'),
+        ('Technical Division', 'Software engineering, AI/ML, web, mobile, and cloud development'),
+        ('Non-Technical Division', 'Creative UI/UX design, marketing, media, and event logistics')
       ON CONFLICT (name) DO NOTHING;
     `;
     await client.query(divisionsQuery);
@@ -48,18 +46,50 @@ const seed = async () => {
         phone: '081111111111',
       },
       {
-        email: 'techhead@gdgoc.unsri.ac.id',
-        name: 'Tech Division Head',
-        role: 'DIVISION_HEAD',
-        division_id: divisionMap['Technology'],
+        email: 'colead@gdgoc.unsri.ac.id',
+        name: 'Co-Lead Admin',
+        role: 'CO_LEAD',
+        division_id: divisionMap['Core Team'],
         nim: '09021282100002',
+        phone: '081111111112',
+      },
+      {
+        email: 'secretary@gdgoc.unsri.ac.id',
+        name: 'Secretary Core',
+        role: 'SECRETARY',
+        division_id: divisionMap['Core Team'],
+        nim: '09021282100003',
+        phone: '081111111113',
+      },
+      {
+        email: 'treasurer@gdgoc.unsri.ac.id',
+        name: 'Treasurer Core',
+        role: 'TREASURER',
+        division_id: divisionMap['Core Team'],
+        nim: '09021282100004',
+        phone: '081111111114',
+      },
+      {
+        email: 'tech@gdgoc.unsri.ac.id',
+        name: 'Technical Officer',
+        role: 'TECHNICAL_DIVISION',
+        division_id: divisionMap['Technical Division'],
+        nim: '09021282100005',
         phone: '082222222222',
+      },
+      {
+        email: 'nontech@gdgoc.unsri.ac.id',
+        name: 'Non-Technical Officer',
+        role: 'NON_TECHNICAL_DIVISION',
+        division_id: divisionMap['Non-Technical Division'],
+        nim: '09021282100006',
+        phone: '083333333333',
       },
       {
         email: 'davin@gdgoc.unsri.ac.id',
         name: 'Davin Gabriel Jonathan',
         role: 'MEMBER',
-        division_id: divisionMap['Technology'],
+        division_id: divisionMap['Technical Division'],
         nim: '09021282126045',
         phone: '081234567890',
       },
@@ -67,7 +97,7 @@ const seed = async () => {
         email: 'member2@gdgoc.unsri.ac.id',
         name: 'Siti Nurhaliza',
         role: 'MEMBER',
-        division_id: divisionMap['Design'],
+        division_id: divisionMap['Non-Technical Division'],
         nim: '09021282126046',
         phone: '081234567891',
       },
@@ -94,7 +124,7 @@ const seed = async () => {
     }
 
     const leadId = insertedUsers['lead@gdgoc.unsri.ac.id'];
-    const techHeadId = insertedUsers['techhead@gdgoc.unsri.ac.id'];
+    const techId = insertedUsers['tech@gdgoc.unsri.ac.id'];
 
     // 4. Upsert Sample Events (1 completed + 2 upcoming)
     const now = new Date();
@@ -119,12 +149,12 @@ const seed = async () => {
       },
       {
         title: 'Google Cloud & Generative AI Workshop',
-        description: 'Deep dive into Vertex AI, Gemini models, and deploying intelligent cloud architectures.',
+        description: 'Practical hands-on workshop covering Gemini models and modern cloud architectures.',
         quota: 50,
         start_time: event1Start.toISOString(),
         end_time: event1End.toISOString(),
         location: 'Auditorium Pascasarjana UNSRI & Google Meet',
-        created_by: techHeadId,
+        created_by: techId,
       },
       {
         title: 'UI/UX Design Sprint 2026',
@@ -153,11 +183,15 @@ const seed = async () => {
 
     await client.query('COMMIT');
     console.log('Seeding completed successfully!');
-    console.log('Test Accounts:');
-    console.log('  LEAD          : lead@gdgoc.unsri.ac.id / Password123!');
-    console.log('  DIVISION_HEAD : techhead@gdgoc.unsri.ac.id / Password123!');
-    console.log('  MEMBER        : davin@gdgoc.unsri.ac.id / Password123!');
-    console.log('  MEMBER 2      : member2@gdgoc.unsri.ac.id / Password123!');
+    console.log('Test Accounts (Password: Password123!):');
+    console.log('  LEAD                   : lead@gdgoc.unsri.ac.id');
+    console.log('  CO_LEAD                : colead@gdgoc.unsri.ac.id');
+    console.log('  SECRETARY              : secretary@gdgoc.unsri.ac.id');
+    console.log('  TREASURER              : treasurer@gdgoc.unsri.ac.id');
+    console.log('  TECHNICAL_DIVISION     : tech@gdgoc.unsri.ac.id');
+    console.log('  NON_TECHNICAL_DIVISION : nontech@gdgoc.unsri.ac.id');
+    console.log('  MEMBER                 : davin@gdgoc.unsri.ac.id');
+    console.log('  MEMBER 2               : member2@gdgoc.unsri.ac.id');
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Seeding failed:', err.message);
