@@ -221,7 +221,7 @@ Endpoint utama meliputi:
 
 ## 🌐 Deployment (Supabase PostgreSQL + Vercel / Railway / Render)
 
-- **Repository GitHub**: [https://github.com/davingabriel/gdsoc-unsri-backend](https://github.com/davingabriel/gdsoc-unsri-backend)
+- **Repository GitHub**: [https://github.com/Davin164/BE_Program_DavinGabrielJonathan](https://github.com/Davin164/BE_Program_DavinGabrielJonathan)
 - **Database Cloud**: **Supabase PostgreSQL** (mendukung Transaction/Session Pooler dengan SSL otomatis).
   1. Buat project di [Supabase](https://supabase.com/), salin **Connection String (URI)** dari *Connect -> Transaction/Session Pooler* ke `DATABASE_URL`.
   2. Jalankan migrasi & seeder satu kali ke database Supabase dari lokal:
