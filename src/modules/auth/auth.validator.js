@@ -53,14 +53,29 @@ const loginValidator = [
     .withMessage('Password is required'),
 ];
 
-const refreshTokenValidator = [
-  body('refreshToken')
+const googleLoginValidator = [
+  body('supabase_token')
     .notEmpty()
+    .withMessage('Supabase OAuth access token is required'),
+  body('email')
+    .optional()
+    .isEmail()
+    .normalizeEmail(),
+  body('name')
+    .optional()
+    .trim()
+    .isLength({ max: 255 }),
+];
+
+const refreshTokenValidator = [
+  body()
+    .custom((val) => Boolean(val?.refreshToken || val?.refresh_token))
     .withMessage('Refresh token is required'),
 ];
 
 module.exports = {
   registerValidator,
   loginValidator,
+  googleLoginValidator,
   refreshTokenValidator,
 };

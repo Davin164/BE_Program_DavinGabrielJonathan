@@ -12,7 +12,6 @@ const { success } = require('../../utils/apiResponse');
  */
 const register = async (req, res, next) => {
   try {
-    // Whitelist allowed fields to prevent mass assignment
     const { email, password, name, nim, phone, division_id } = req.body;
     const result = await authService.register({
       email,
@@ -43,12 +42,25 @@ const login = async (req, res, next) => {
 };
 
 /**
+ * Handle Google OAuth login verified via Supabase Auth BaaS.
+ */
+const googleLogin = async (req, res, next) => {
+  try {
+    const { supabase_token, email, name } = req.body;
+    const result = await authService.loginWithGoogle({ supabase_token, email, name });
+    return success(res, result, 200);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
  * Handle refresh token request.
  */
 const refresh = async (req, res, next) => {
   try {
-    const { refreshToken } = req.body;
-    const result = await authService.refresh(refreshToken);
+    const token = req.body.refreshToken || req.body.refresh_token;
+    const result = await authService.refresh(token);
     return success(res, result, 200);
   } catch (err) {
     next(err);
@@ -77,6 +89,7 @@ const getMe = async (req, res, next) => {
 module.exports = {
   register,
   login,
+  googleLogin,
   refresh,
   logout,
   getMe,

@@ -2,19 +2,23 @@
  * @file database.js
  * @description PostgreSQL connection pool setup using the pg library.
  * Parameterized queries are enforced; no ORM is used for security and explicit control.
+ * Automatically enables TLS/SSL when connecting to cloud PostgreSQL (e.g. Supabase, Railway, Render).
  */
 
 const { Pool } = require('pg');
 const env = require('./env');
 
-const isProduction = env.NODE_ENV === 'production';
+const isLocalDb =
+  env.DATABASE_URL.includes('localhost') ||
+  env.DATABASE_URL.includes('127.0.0.1') ||
+  env.DATABASE_URL.includes('@db:');
 
 const pool = new Pool({
   connectionString: env.DATABASE_URL,
-  ssl: isProduction ? { rejectUnauthorized: false } : false,
-  max: 20, // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-  connectionTimeoutMillis: 5000, // Return an error after 5 seconds if connection cannot be established
+  ssl: isLocalDb ? false : { rejectUnauthorized: false },
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
 });
 
 pool.on('error', (err) => {

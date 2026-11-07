@@ -23,15 +23,27 @@ const divisionsRouter = require('./modules/divisions/divisions.router');
 
 const app = express();
 
+// Trust reverse proxy headers (Vercel, Render, Railway, Cloud Run) for accurate IP rate limiting
+app.set('trust proxy', 1);
+
 // Security HTTP headers
 app.use(helmet());
+
+// Parse comma-separated allowed origins (normalized without trailing slashes)
+const allowedOrigins = env.FRONTEND_URL.split(',')
+  .map((url) => url.trim().replace(/\/$/, ''))
+  .filter(Boolean);
 
 // CORS configuration
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server) or matching configured frontend
-      if (!origin || origin === env.FRONTEND_URL || env.NODE_ENV !== 'production') {
+      const normalizedOrigin = origin ? origin.replace(/\/$/, '') : '';
+      if (
+        !origin ||
+        allowedOrigins.includes(normalizedOrigin) ||
+        env.NODE_ENV !== 'production'
+      ) {
         callback(null, true);
       } else {
         callback(new Error('Blocked by CORS policy'));
