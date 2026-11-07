@@ -1,8 +1,7 @@
-version: '3.8'
-
 services:
   api:
     build: .
+    command: sh -c "node src/scripts/migrate.js && node seeds/seed.js && node src/server.js"
     ports:
       - "3000:3000"
     environment:
