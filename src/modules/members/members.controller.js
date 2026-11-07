@@ -14,10 +14,15 @@ const list = async (req, res, next) => {
   try {
     const { page, limit, search, role, division_id, sort, order } = req.query;
     const { members, total, totalPages, page: currentPage, limit: currentLimit } =
-      await membersService.getMembers(
-        { page, limit, search, role, division_id, sort, order },
-        req.user
-      );
+      await membersService.getMembers({
+        page,
+        limit,
+        search,
+        role,
+        division_id,
+        sort,
+        order,
+      });
 
     return success(res, members, 200, {
       total,
@@ -31,11 +36,28 @@ const list = async (req, res, next) => {
 };
 
 /**
+ * Create a new member (LEAD only).
+ */
+const create = async (req, res, next) => {
+  try {
+    const { name, email, password, role, division_id, nim, phone } = req.body;
+    const createdMember = await membersService.createMember(
+      { name, email, password, role, division_id, nim, phone },
+      req.user,
+      req.ip
+    );
+    return success(res, createdMember, 201);
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
  * Get member detail by ID.
  */
 const getById = async (req, res, next) => {
   try {
-    const member = await membersService.getMemberById(req.params.id, req.user);
+    const member = await membersService.getMemberById(req.params.id);
     return success(res, member, 200);
   } catch (err) {
     next(err);
@@ -48,7 +70,6 @@ const getById = async (req, res, next) => {
  */
 const update = async (req, res, next) => {
   try {
-    // Whitelist only allowed fields to prevent mass assignment
     const { name, phone, nim, division_id } = req.body;
     const updatedMember = await membersService.updateProfile(
       req.params.id,
@@ -86,11 +107,7 @@ const updateRole = async (req, res, next) => {
  */
 const deleteMember = async (req, res, next) => {
   try {
-    const result = await membersService.deleteMember(
-      req.params.id,
-      req.user,
-      req.ip
-    );
+    const result = await membersService.deleteMember(req.params.id, req.user, req.ip);
 
     return success(res, result, 200);
   } catch (err) {
@@ -100,6 +117,7 @@ const deleteMember = async (req, res, next) => {
 
 module.exports = {
   list,
+  create,
   getById,
   update,
   updateRole,

@@ -96,8 +96,11 @@ const seed = async () => {
     const leadId = insertedUsers['lead@gdgoc.unsri.ac.id'];
     const techHeadId = insertedUsers['techhead@gdgoc.unsri.ac.id'];
 
-    // 4. Upsert Sample Events
+    // 4. Upsert Sample Events (1 completed + 2 upcoming)
     const now = new Date();
+    const pastEventStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const pastEventEnd = new Date(pastEventStart.getTime() + 3 * 60 * 60 * 1000);
+
     const event1Start = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
     const event1End = new Date(event1Start.getTime() + 4 * 60 * 60 * 1000);
 
@@ -105,6 +108,15 @@ const seed = async () => {
     const event2End = new Date(event2Start.getTime() + 3 * 60 * 60 * 1000);
 
     const events = [
+      {
+        title: 'GDGoC UNSRI Kickoff & Info Session 2026',
+        description: 'Opening session introducing Google Developer Groups on Campus Universitas Sriwijaya divisions, roadmap, and core team.',
+        quota: 100,
+        start_time: pastEventStart.toISOString(),
+        end_time: pastEventEnd.toISOString(),
+        location: 'Aula Fakultas Ilmu Komputer UNSRI',
+        created_by: leadId,
+      },
       {
         title: 'Google Cloud & Generative AI Workshop',
         description: 'Deep dive into Vertex AI, Gemini models, and deploying intelligent cloud architectures.',
@@ -126,12 +138,17 @@ const seed = async () => {
     ];
 
     for (const ev of events) {
-      await client.query(
-        `INSERT INTO events (title, description, quota, start_time, end_time, location, created_by)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
-         ON CONFLICT DO NOTHING;`,
-        [ev.title, ev.description, ev.quota, ev.start_time, ev.end_time, ev.location, ev.created_by]
+      const existingEv = await client.query(
+        'SELECT id FROM events WHERE title = $1 AND is_deleted = FALSE LIMIT 1',
+        [ev.title]
       );
+      if (existingEv.rows.length === 0) {
+        await client.query(
+          `INSERT INTO events (title, description, quota, start_time, end_time, location, created_by)
+           VALUES ($1, $2, $3, $4, $5, $6, $7);`,
+          [ev.title, ev.description, ev.quota, ev.start_time, ev.end_time, ev.location, ev.created_by]
+        );
+      }
     }
 
     await client.query('COMMIT');

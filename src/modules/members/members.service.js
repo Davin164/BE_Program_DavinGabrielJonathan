@@ -1,24 +1,71 @@
 /**
  * @file members.service.js
  * @description Business logic for member management, enforcing RBAC, IDOR prevention,
- * and security audit logging for administrative mutations.
+ * and security audit logging for sensitive mutations (PDF Back-End requirement).
  */
 
 const membersRepository = require('./members.repository');
+const { hashPassword } = require('../../utils/password');
 const { createAuditLog } = require('../../utils/auditLogger');
 
 /**
  * Retrieve paginated list of members.
  */
-const getMembers = async (queryOptions, currentUser) => {
-  // If DIVISION_HEAD, can optionally filter or view members
+const getMembers = async (queryOptions) => {
   return membersRepository.findMembers(queryOptions);
+};
+
+/**
+ * Create a new member (LEAD only).
+ */
+const createMember = async (
+  { name, email, password, role = 'MEMBER', division_id = null, nim = null, phone = null },
+  currentUser,
+  ipAddress = null
+) => {
+  if (currentUser.role !== 'LEAD') {
+    const err = new Error('Forbidden: Only LEAD can create member accounts directly.');
+    err.statusCode = 403;
+    err.code = 'FORBIDDEN';
+    throw err;
+  }
+
+  const existing = await membersRepository.findByEmail(email);
+  if (existing) {
+    const err = new Error('An account with this email address already exists.');
+    err.statusCode = 409;
+    err.code = 'EMAIL_ALREADY_EXISTS';
+    throw err;
+  }
+
+  const passwordHash = await hashPassword(password || 'Password123!');
+  const created = await membersRepository.create({
+    name,
+    email,
+    password_hash: passwordHash,
+    role,
+    division_id: division_id || null,
+    nim: nim || null,
+    phone: phone || null,
+  });
+
+  await createAuditLog({
+    actor_id: currentUser.id,
+    target_id: created.id,
+    target_table: 'users',
+    action: 'MEMBER_CREATE',
+    old_value: null,
+    new_value: { email: created.email, role: created.role },
+    ip_address: ipAddress,
+  });
+
+  return created;
 };
 
 /**
  * Retrieve single member details by ID.
  */
-const getMemberById = async (id, currentUser) => {
+const getMemberById = async (id) => {
   const member = await membersRepository.findById(id);
 
   if (!member || member.is_deleted) {
@@ -61,7 +108,6 @@ const updateProfile = async (targetId, fields, currentUser) => {
       err.code = 'FORBIDDEN';
       throw err;
     }
-    // Cannot modify another DIVISION_HEAD or LEAD
     if (targetUser.role === 'LEAD' || targetUser.role === 'DIVISION_HEAD') {
       const err = new Error('You do not have permission to modify this leadership account.');
       err.statusCode = 403;
@@ -82,9 +128,9 @@ const updateProfile = async (targetId, fields, currentUser) => {
 
 /**
  * Update user role (LEAD only).
- * Automatically logs to audit_logs table.
+ * Automatically records a security audit log entry (ROLE_CHANGE).
  */
-const updateRole = async (targetId, newRole, currentUser, ipAddress) => {
+const updateRole = async (targetId, newRole, currentUser, ipAddress = null) => {
   if (currentUser.role !== 'LEAD') {
     const err = new Error('Forbidden: Only LEAD can assign user roles.');
     err.statusCode = 403;
@@ -101,12 +147,10 @@ const updateRole = async (targetId, newRole, currentUser, ipAddress) => {
     throw err;
   }
 
-  // Prevent changing role if already same
   if (targetUser.role === newRole) {
     return targetUser;
   }
 
-  // Prevent lead from demoting self if it would leave the system without a lead
   if (currentUser.id === targetId && newRole !== 'LEAD') {
     const err = new Error('Cannot demote your own LEAD account.');
     err.statusCode = 400;
@@ -116,7 +160,6 @@ const updateRole = async (targetId, newRole, currentUser, ipAddress) => {
 
   const updatedUser = await membersRepository.updateRole(targetId, newRole);
 
-  // Write audit log entry
   await createAuditLog({
     actor_id: currentUser.id,
     target_id: targetId,
@@ -133,7 +176,7 @@ const updateRole = async (targetId, newRole, currentUser, ipAddress) => {
 /**
  * Soft delete a member (LEAD only).
  */
-const deleteMember = async (targetId, currentUser, ipAddress) => {
+const deleteMember = async (targetId, currentUser, ipAddress = null) => {
   if (currentUser.role !== 'LEAD') {
     const err = new Error('Forbidden: Only LEAD can deactivate accounts.');
     err.statusCode = 403;
@@ -173,6 +216,7 @@ const deleteMember = async (targetId, currentUser, ipAddress) => {
 
 module.exports = {
   getMembers,
+  createMember,
   getMemberById,
   updateProfile,
   updateRole,
