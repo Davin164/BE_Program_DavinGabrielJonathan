@@ -59,6 +59,36 @@ paths:
         401:
           $ref: '#/components/responses/UnauthorizedError'
 
+  /api/auth/google:
+    post:
+      summary: Authenticate via Google OAuth (Supabase Auth token verification)
+      description: Verifies Supabase OAuth access token, provisions member record if needed, and returns backend JWT tokens.
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [supabase_token]
+              properties:
+                supabase_token:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                name:
+                  type: string
+      responses:
+        200:
+          description: Google OAuth login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+        401:
+          $ref: '#/components/responses/UnauthorizedError'
+
   /api/auth/refresh:
     post:
       summary: Refresh access token
@@ -168,6 +198,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedMembersResponse'
+    post:
+      summary: Create a new member directly (LEAD only)
+      description: Creates a new member account with specified role and logs MEMBER_CREATE in audit_logs.
+      tags: [Members]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email]
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 6 }
+                role: { type: string, enum: [LEAD, DIVISION_HEAD, MEMBER] }
+                division_id: { type: string, format: uuid }
+                nim: { type: string }
+                phone: { type: string }
+      responses:
+        201:
+          description: Member created successfully
+        403:
+          $ref: '#/components/responses/ForbiddenError'
+        409:
+          $ref: '#/components/responses/ConflictError'
 
   /api/members/{id}:
     get:
