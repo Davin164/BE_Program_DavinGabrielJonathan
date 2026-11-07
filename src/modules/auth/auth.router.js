@@ -8,6 +8,7 @@ const authController = require('./auth.controller');
 const {
   registerValidator,
   loginValidator,
+  googleLoginValidator,
   refreshTokenValidator,
 } = require('./auth.validator');
 const { validate } = require('../../middleware/validate');
@@ -19,6 +20,7 @@ const router = Router();
 // Public auth routes with rate limiting
 router.post('/register', authLimiter, registerValidator, validate, authController.register);
 router.post('/login', authLimiter, loginValidator, validate, authController.login);
+router.post('/google', authLimiter, googleLoginValidator, validate, authController.googleLogin);
 router.post('/refresh', refreshTokenValidator, validate, authController.refresh);
 
 // Authenticated auth routes
