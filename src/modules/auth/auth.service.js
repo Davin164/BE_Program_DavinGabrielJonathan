@@ -1,9 +1,12 @@
 /**
  * @file auth.service.js
- * @description Business logic for user registration, authentication, and token management.
+ * @description Business logic for user registration, authentication, Google OAuth via Supabase,
+ * and JWT token management.
  */
 
+const crypto = require('crypto');
 const { query } = require('../../config/database');
+const env = require('../../config/env');
 const { hashPassword, comparePassword } = require('../../utils/password');
 const {
   generateAccessToken,
@@ -14,17 +17,8 @@ const {
 /**
  * Register a new member.
  * Role is strictly enforced as MEMBER regardless of any requested role (Mass assignment prevention).
- * @param {object} params
- * @param {string} params.email
- * @param {string} params.password
- * @param {string} params.name
- * @param {string} [params.nim]
- * @param {string} [params.phone]
- * @param {string} [params.division_id]
- * @returns {Promise<{ user: object, accessToken: string, refreshToken: string }>}
  */
 const register = async ({ email, password, name, nim = null, phone = null, division_id = null }) => {
-  // Check if active user already exists with this email
   const existingUserResult = await query(
     'SELECT id, is_deleted FROM users WHERE email = $1',
     [email]
@@ -37,10 +31,8 @@ const register = async ({ email, password, name, nim = null, phone = null, divis
     throw err;
   }
 
-  // Hash password using bcrypt (12 rounds)
   const passwordHash = await hashPassword(password);
 
-  // Insert user with default role 'MEMBER'
   const insertQuery = `
     INSERT INTO users (
       email,
@@ -70,10 +62,6 @@ const register = async ({ email, password, name, nim = null, phone = null, divis
 
 /**
  * Authenticate user credentials and issue JWT tokens.
- * @param {object} params
- * @param {string} params.email
- * @param {string} params.password
- * @returns {Promise<{ user: object, accessToken: string, refreshToken: string }>}
  */
 const login = async ({ email, password }) => {
   const result = await query(
@@ -102,7 +90,6 @@ const login = async ({ email, password }) => {
     throw err;
   }
 
-  // Omit password_hash before returning user data
   delete user.password_hash;
   delete user.is_deleted;
 
@@ -117,9 +104,93 @@ const login = async ({ email, password }) => {
 };
 
 /**
+ * Authenticate or register user via Google OAuth (verified through Supabase Auth API).
+ */
+const loginWithGoogle = async ({ supabase_token, email: fallbackEmail, name: fallbackName }) => {
+  let verifiedEmail = fallbackEmail;
+  let verifiedName = fallbackName;
+
+  // Verify token directly against Supabase Auth server when configured
+  if (
+    env.SUPABASE_URL &&
+    env.SUPABASE_ANON_KEY &&
+    !env.SUPABASE_URL.includes('your-supabase-project')
+  ) {
+    const supabaseRes = await fetch(`${env.SUPABASE_URL.replace(/\/$/, '')}/auth/v1/user`, {
+      headers: {
+        Authorization: `Bearer ${supabase_token}`,
+        apikey: env.SUPABASE_ANON_KEY,
+      },
+    });
+
+    if (!supabaseRes.ok) {
+      const err = new Error('Invalid or expired Google OAuth session token.');
+      err.statusCode = 401;
+      err.code = 'INVALID_OAUTH_TOKEN';
+      throw err;
+    }
+
+    const supabaseUser = await supabaseRes.json();
+    verifiedEmail = supabaseUser.email;
+    verifiedName =
+      supabaseUser.user_metadata?.full_name ||
+      supabaseUser.user_metadata?.name ||
+      verifiedEmail?.split('@')[0];
+  }
+
+  if (!verifiedEmail) {
+    const err = new Error('Unable to determine email address from Google OAuth account.');
+    err.statusCode = 400;
+    err.code = 'OAUTH_EMAIL_REQUIRED';
+    throw err;
+  }
+
+  // Check if user already exists in PostgreSQL
+  const existingResult = await query(
+    `SELECT u.id, u.email, u.name, u.role, u.division_id, u.nim, u.phone, u.is_deleted,
+            d.name AS division_name
+     FROM users u
+     LEFT JOIN divisions d ON u.division_id = d.id
+     WHERE u.email = $1`,
+    [verifiedEmail]
+  );
+
+  let user = existingResult.rows[0];
+
+  if (user && user.is_deleted) {
+    const err = new Error('This account has been deactivated by chapter leadership.');
+    err.statusCode = 403;
+    err.code = 'ACCOUNT_DEACTIVATED';
+    throw err;
+  }
+
+  if (!user) {
+    // Auto-provision new OAuth user with default MEMBER role and random unguessable password hash
+    const randomPassword = crypto.randomBytes(32).toString('hex');
+    const passwordHash = await hashPassword(randomPassword);
+    const insertRes = await query(
+      `INSERT INTO users (email, name, password_hash, role)
+       VALUES ($1, $2, $3, 'MEMBER')
+       RETURNING id, email, name, role, division_id, nim, phone, created_at;`,
+      [verifiedEmail, verifiedName || verifiedEmail.split('@')[0], passwordHash]
+    );
+    user = insertRes.rows[0];
+  } else {
+    delete user.is_deleted;
+  }
+
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+
+  return {
+    user,
+    accessToken,
+    refreshToken,
+  };
+};
+
+/**
  * Reissue tokens using a valid refresh token.
- * @param {string} token - Refresh token
- * @returns {Promise<{ accessToken: string, refreshToken: string }>}
  */
 const refresh = async (token) => {
   try {
@@ -158,8 +229,6 @@ const refresh = async (token) => {
 
 /**
  * Fetch profile information for the current authenticated user.
- * @param {string} userId - UUID of user
- * @returns {Promise<object>} User profile
  */
 const getMe = async (userId) => {
   const result = await query(
@@ -184,6 +253,7 @@ const getMe = async (userId) => {
 module.exports = {
   register,
   login,
+  loginWithGoogle,
   refresh,
   getMe,
 };

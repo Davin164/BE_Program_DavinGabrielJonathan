@@ -128,7 +128,20 @@ docker compose down
 ```bash
 cp .env.example .env
 ```
-Sesuaikan `DATABASE_URL` jika menggunakan kredensial PostgreSQL lokal Anda.
+Sesuaikan nilai variabel di `.env` (berikut contoh konfigurasi lokal maupun Supabase PostgreSQL):
+```env
+PORT=3000
+NODE_ENV=development
+DATABASE_URL=postgresql://gdgoc_user:gdgoc_pass@localhost:5432/gdgoc_unsri
+JWT_ACCESS_SECRET=gdgoc_unsri_access_secret_key_2025_super_secure
+JWT_REFRESH_SECRET=gdgoc_unsri_refresh_secret_key_2025_super_secure
+JWT_ACCESS_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
+FRONTEND_URL=http://localhost:5173
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+*(Catatan: Jika `DATABASE_URL` diarahkan ke cloud seperti Supabase PostgreSQL Pooler/Direct Connection, SSL akan aktif secara otomatis).*
 
 ### 2. Install Dependensi
 ```bash
@@ -181,12 +194,12 @@ Spesifikasi OpenAPI 3.0 lengkap tersedia di file:
 `docs/openapi.yaml`
 
 Endpoint utama meliputi:
-- **Auth**: `/api/auth/register`, `/api/auth/login`, `/api/auth/refresh`, `/api/auth/me`
-- **Members**: `/api/members` (GET, POST), `/api/members/:id` (GET, PUT, DELETE), `/api/members/:id/role` (PATCH)
+- **Auth**: `/api/auth/register`, `/api/auth/login`, `/api/auth/google` (Supabase OAuth), `/api/auth/refresh`, `/api/auth/me`
+- **Members**: `/api/members` (GET, POST - LEAD only), `/api/members/:id` (GET, PUT, DELETE), `/api/members/:id/role` (PATCH - LEAD only)
 - **Events**: `/api/events` (GET, POST), `/api/events/:id` (GET, PUT, DELETE)
 - **Registrations**: `/api/events/:id/register` (POST, DELETE), `/api/events/:id/registrations` (GET)
 - **Attendances**: `/api/events/:id/checkin` (POST), `/api/events/:id/attendances` (GET), `/api/attendances/my` (GET)
-- **Audit Logs**: `/api/audit-logs` (GET - LEAD only)
+- **Audit Logs**: `/api/audit-logs` (GET - LEAD only; mencatat `ROLE_CHANGE`, `MEMBER_CREATE`, `USER_DELETE`, dan `EVENT_DELETE`)
 - **Divisions**: `/api/divisions` (GET)
 
 ---
@@ -206,8 +219,17 @@ Endpoint utama meliputi:
 
 ---
 
-## 🌐 Deployment
+## 🌐 Deployment (Supabase PostgreSQL + Vercel / Railway / Render)
 
-- **Repository GitHub**: [https://github.com/davingabriel/gdsoc-unsri-backend](https://github.com/davingabriel/gdsoc-unsri-backend)
-- **Target Platform**: Google Cloud Run / Railway
-- **Environment**: Cloud-native Docker container dengan managed PostgreSQL.
+- **Repository GitHub**: [https://github.com/Davin164/BE_Program_DavinGabrielJonathan](https://github.com/Davin164/BE_Program_DavinGabrielJonathan)
+- **Database Cloud**: **Supabase PostgreSQL** (mendukung Transaction/Session Pooler dengan SSL otomatis).
+  1. Buat project di [Supabase](https://supabase.com/), salin **Connection String (URI)** dari *Connect -> Transaction/Session Pooler* ke `DATABASE_URL`.
+  2. Jalankan migrasi & seeder satu kali ke database Supabase dari lokal:
+     ```bash
+     npm run migrate
+     npm run seed
+     ```
+- **Target Platform Hosting API**:
+  - **Vercel Serverless** (`api/index.js` & `vercel.json` sudah dikonfigurasi siap pakai), atau
+  - **Railway / Render / Google Cloud Run** (`Dockerfile` multi-stage siap pakai).
+  - Masukkan seluruh variabel `.env` (`DATABASE_URL`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `FRONTEND_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`) di dashboard hosting.
