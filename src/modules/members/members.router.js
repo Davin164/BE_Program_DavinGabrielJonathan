@@ -8,6 +8,7 @@ const membersController = require('./members.controller');
 const {
   listMembersValidator,
   memberIdParamValidator,
+  createMemberValidator,
   updateProfileValidator,
   updateRoleValidator,
 } = require('./members.validator');
@@ -22,6 +23,15 @@ router.use(authenticate);
 
 // List members (All authenticated roles)
 router.get('/', listMembersValidator, validate, membersController.list);
+
+// Create member (LEAD only)
+router.post(
+  '/',
+  authorize('LEAD'),
+  createMemberValidator,
+  validate,
+  membersController.create
+);
 
 // Get single member (All authenticated roles)
 router.get('/:id', memberIdParamValidator, validate, membersController.getById);

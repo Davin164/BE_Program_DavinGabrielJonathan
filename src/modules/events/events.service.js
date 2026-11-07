@@ -96,7 +96,7 @@ const updateEvent = async (id, fields, currentUser) => {
  * Soft delete an event.
  * Permission: LEAD can delete any event; DIVISION_HEAD can only delete events they created.
  */
-const deleteEvent = async (id, currentUser, ipAddress) => {
+const deleteEvent = async (id, currentUser, ipAddress = null) => {
   const existingEvent = await eventsRepository.findById(id);
 
   if (!existingEvent || existingEvent.is_deleted) {

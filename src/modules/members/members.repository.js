@@ -8,15 +8,6 @@ const { query } = require('../../config/database');
 
 /**
  * Retrieve paginated list of members with filtering and sorting.
- * @param {object} params
- * @param {number} [params.page=1]
- * @param {number} [params.limit=10]
- * @param {string} [params.search]
- * @param {string} [params.role]
- * @param {string} [params.division_id]
- * @param {string} [params.sort='created_at']
- * @param {string} [params.order='desc']
- * @returns {Promise<{ members: Array<object>, total: number, page: number, limit: number, totalPages: number }>}
  */
 const findMembers = async ({
   page = 1,
@@ -87,8 +78,6 @@ const findMembers = async ({
 
 /**
  * Find user by ID (active or inactive).
- * @param {string} id - UUID
- * @returns {Promise<object|null>}
  */
 const findById = async (id) => {
   const result = await query(
@@ -103,10 +92,31 @@ const findById = async (id) => {
 };
 
 /**
+ * Find user by email.
+ */
+const findByEmail = async (email) => {
+  const result = await query(
+    'SELECT id, email, is_deleted FROM users WHERE email = $1',
+    [email]
+  );
+  return result.rows[0] || null;
+};
+
+/**
+ * Create a new user record.
+ */
+const create = async ({ name, email, password_hash, role, division_id, nim, phone }) => {
+  const result = await query(
+    `INSERT INTO users (email, name, password_hash, role, division_id, nim, phone)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     RETURNING id, email, name, role, division_id, nim, phone, created_at, updated_at;`,
+    [email, name, password_hash, role, division_id, nim, phone]
+  );
+  return result.rows[0];
+};
+
+/**
  * Update member profile fields.
- * @param {string} id - UUID
- * @param {object} fields - Whitelisted fields: name, nim, phone, division_id
- * @returns {Promise<object>} Updated user
  */
 const updateProfile = async (id, fields) => {
   const keys = Object.keys(fields).filter((k) =>
@@ -139,9 +149,6 @@ const updateProfile = async (id, fields) => {
 
 /**
  * Update user role.
- * @param {string} id - UUID
- * @param {string} newRole - 'LEAD' | 'DIVISION_HEAD' | 'MEMBER'
- * @returns {Promise<object>} Updated user
  */
 const updateRole = async (id, newRole) => {
   const sql = `
@@ -156,8 +163,6 @@ const updateRole = async (id, newRole) => {
 
 /**
  * Soft delete user.
- * @param {string} id - UUID
- * @returns {Promise<boolean>}
  */
 const softDelete = async (id) => {
   const sql = `
@@ -173,6 +178,8 @@ const softDelete = async (id) => {
 module.exports = {
   findMembers,
   findById,
+  findByEmail,
+  create,
   updateProfile,
   updateRole,
   softDelete,

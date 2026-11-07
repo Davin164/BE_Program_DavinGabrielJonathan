@@ -42,6 +42,44 @@ const memberIdParamValidator = [
     .withMessage('Member ID must be a valid UUID'),
 ];
 
+const createMemberValidator = [
+  body('name')
+    .trim()
+    .notEmpty()
+    .withMessage('Name is required')
+    .isLength({ min: 2, max: 255 })
+    .withMessage('Name must be between 2 and 255 characters'),
+  body('email')
+    .trim()
+    .notEmpty()
+    .withMessage('Email is required')
+    .isEmail()
+    .withMessage('Must be a valid email address')
+    .normalizeEmail(),
+  body('password')
+    .optional({ checkFalsy: true })
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters'),
+  body('role')
+    .optional()
+    .isIn(['LEAD', 'DIVISION_HEAD', 'MEMBER'])
+    .withMessage('Role must be LEAD, DIVISION_HEAD, or MEMBER'),
+  body('division_id')
+    .optional({ checkFalsy: true })
+    .isUUID()
+    .withMessage('division_id must be a valid UUID'),
+  body('nim')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 20 })
+    .withMessage('NIM must not exceed 20 characters'),
+  body('phone')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 20 })
+    .withMessage('Phone must not exceed 20 characters'),
+];
+
 const updateProfileValidator = [
   ...memberIdParamValidator,
   body('name')
@@ -77,6 +115,7 @@ const updateRoleValidator = [
 module.exports = {
   listMembersValidator,
   memberIdParamValidator,
+  createMemberValidator,
   updateProfileValidator,
   updateRoleValidator,
 };
