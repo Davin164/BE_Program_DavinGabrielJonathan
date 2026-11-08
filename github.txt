@@ -19,17 +19,27 @@ Anon Key: your-supabase-publishable-key
 5. Akun Pengujian (Test Accounts untuk Setiap Role)
 Password untuk seluruh akun uji: Password123!
 
-Role LEAD (Akses Penuh Chapter, Manajemen Anggota & Role, Audit Log)
-Email: lead.gdgoc@gmail.com
-Password: Password123!
+LEAD (akses penuh: kelola anggota, ubah role, audit log)
+lead.gdgoc@gmail.com
 
-Role CORE_TEAM / Div Head (Manajemen Event, Absensi Peserta, Audit Log)
-Email: core.tech@gmail.com
-Password: Password123!
+CO_LEAD (eksekutif: kelola event dan absensi)
+colead.gdgoc@gmail.com
 
-Role MEMBER (Pendaftaran Event, Absensi Mandiri, Profil)
-Email: davin4@gmail.com
-Password: Password123!
+SECRETARY_1 / SECRETARY_2 (eksekutif)
+sec1.gdgoc@gmail.com
+sec2.gdgoc@gmail.com
+
+TREASURER_1 / TREASURER_2 (eksekutif)
+treas1.gdgoc@gmail.com
+treas2.gdgoc@gmail.com
+
+CORE_TEAM (eksekutif)
+core.tech@gmail.com
+core.ml@gmail.com
+
+MEMBER (daftar event, absen mandiri, ubah profil sendiri)
+davin4@gmail.com
+member.gdgoc@gmail.com
 
 6. Cara Menjalankan Secara Lokal
 File konfigurasi .env telah disediakan lengkap di dalam folder proyek ini.
