@@ -1,25 +1,11 @@
-/**
- * @file attendances.service.js
- * @description Business logic for attendance check-ins.
- * Enforces:
- * 1. Attendance only valid during the event time window (start_time <= now <= end_time)
- * 2. Attendance only permitted for previously registered participants
- * 3. Idempotent check-ins via PostgreSQL ON CONFLICT DO NOTHING (no duplicates)
- */
+// Service absensi event
 
 const { query } = require('../../config/database');
 const attendancesRepository = require('./attendances.repository');
 
-/**
- * Perform idempotent attendance check-in for an event.
- * Validates time window, registration status, and idempotently records attendance.
- *
- * @param {string} userId - UUID of user attempting check-in
- * @param {string} eventId - UUID of event
- * @returns {Promise<object>} Attendance record
- */
+// Check-in kehadiran peserta (hanya saat event berlangsung dan user sudah terdaftar)
 const checkIn = async (userId, eventId) => {
-  // 1. Verify that the event exists and is not soft-deleted
+  // Pastikan event ada dan aktif
   const eventResult = await query(
     'SELECT id, title, is_deleted, start_time, end_time FROM events WHERE id = $1 AND is_deleted = FALSE',
     [eventId]
@@ -37,7 +23,7 @@ const checkIn = async (userId, eventId) => {
   const startTime = new Date(event.start_time);
   const endTime = new Date(event.end_time);
 
-  // 2. Validate time window: Check-in only allowed while event is active
+  // Absensi hanya dibuka pada rentang waktu event
   if (now < startTime || now > endTime) {
     const err = new Error('Absensi hanya valid pada jendela waktu pelaksanaan event.');
     err.statusCode = 400;
@@ -45,7 +31,7 @@ const checkIn = async (userId, eventId) => {
     throw err;
   }
 
-  // 3. Validate registration: Check-in only valid for registered participants
+  // Pastikan user sudah terdaftar
   const registrationResult = await query(
     'SELECT id FROM registrations WHERE user_id = $1 AND event_id = $2',
     [userId, eventId]
@@ -58,7 +44,7 @@ const checkIn = async (userId, eventId) => {
     throw err;
   }
 
-  // 4. Record attendance idempotently
+  // Simpan catatan absensi
   const { attendance, created } = await attendancesRepository.recordCheckIn(userId, eventId);
 
   return {

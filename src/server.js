@@ -1,38 +1,26 @@
-/**
- * @file server.js
- * @description Application entry point that starts the HTTP server
- * and handles graceful process termination.
- */
+// HTTP server entry point GDGoC UNSRI API
 
 const app = require('./app');
 const env = require('./config/env');
 const { pool } = require('./config/database');
 
 const server = app.listen(env.PORT, () => {
-  console.log(`===================================================`);
-  console.log(`GDGoC UNSRI Management API running on port ${env.PORT}`);
-  console.log(`Environment : ${env.NODE_ENV}`);
-  console.log(`Database    : ${env.DATABASE_URL.replace(/:[^:@]+@/, ':****@')}`);
-  console.log(`Healthcheck : http://localhost:${env.PORT}/health`);
-  console.log(`===================================================`);
+  console.log(`GDGoC UNSRI API running on port ${env.PORT} (${env.NODE_ENV})`);
+  console.log(`Healthcheck: http://localhost:${env.PORT}/health`);
 });
 
-// Graceful shutdown handling
 const gracefulShutdown = async (signal) => {
-  console.log(`\nReceived ${signal}. Gracefully shutting down...`);
+  console.log(`\nReceived ${signal}. Shutting down...`);
   server.close(async () => {
-    console.log('HTTP server closed.');
     try {
       await pool.end();
-      console.log('PostgreSQL database pool closed.');
       process.exit(0);
     } catch (err) {
-      console.error('Error closing database pool:', err.message);
+      console.error('Error closing DB pool:', err.message);
       process.exit(1);
     }
   });
 
-  // Force shutdown after 10 seconds timeout
   setTimeout(() => {
     console.error('Forced shutdown due to timeout.');
     process.exit(1);

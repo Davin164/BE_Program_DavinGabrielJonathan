@@ -14,7 +14,7 @@ servers:
     description: Local Development Server
 
 paths:
-  # ================= AUTH =================
+  # Auth
   /api/auth/register:
     post:
       summary: Register a new member
@@ -140,7 +140,7 @@ paths:
         401:
           $ref: '#/components/responses/UnauthorizedError'
 
-  # ================= DIVISIONS =================
+  # Divisions
   /api/divisions:
     get:
       summary: List all divisions
@@ -161,7 +161,7 @@ paths:
                     items:
                       $ref: '#/components/schemas/Division'
 
-  # ================= MEMBERS =================
+  # Members
   /api/members:
     get:
       summary: List members (Paginated, Searchable, Filterable)
@@ -313,7 +313,7 @@ paths:
         403:
           $ref: '#/components/responses/ForbiddenError'
 
-  # ================= EVENTS =================
+  # Events
   /api/events:
     get:
       summary: List events (Paginated, Upcoming/Past, Searchable)
@@ -414,7 +414,7 @@ paths:
         403:
           $ref: '#/components/responses/ForbiddenError'
 
-  # ================= REGISTRATIONS =================
+  # Registrations
   /api/events/{id}/register:
     post:
       summary: Register current user for an event (Pessimistic Locking Quota Enforcement)
@@ -483,7 +483,7 @@ paths:
         200:
           description: User registration list
 
-  # ================= ATTENDANCE =================
+  # Attendance
   /api/events/{id}/checkin:
     post:
       summary: Check in attendance (Idempotent ON CONFLICT DO NOTHING)
@@ -529,7 +529,7 @@ paths:
         200:
           description: User attendance records
 
-  # ================= AUDIT LOGS =================
+  # Audit Logs
   /api/audit-logs:
     get:
       summary: View security and administrative audit logs (LEAD only)
@@ -562,7 +562,7 @@ paths:
         403:
           $ref: '#/components/responses/ForbiddenError'
 
-# ================= COMPONENTS =================
+# Components
 components:
   securitySchemes:
     BearerAuth:
