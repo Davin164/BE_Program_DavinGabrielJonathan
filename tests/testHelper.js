@@ -47,7 +47,22 @@ const cleanTestDb = async () => {
     `);
     // Ensure divisions exist
     await query(`
-      INSERT INTO divisions (name) VALUES ('Core Team'), ('Technical Division'), ('Non-Technical Division')
+      INSERT INTO divisions (name) VALUES 
+        ('Web Development'), 
+        ('Machine Learning'), 
+        ('Mobile Development'), 
+        ('Cloud Computing'), 
+        ('UI/UX'), 
+        ('Competitive Programming'), 
+        ('Cyber Security'), 
+        ('Project Management'), 
+        ('Human Resource'), 
+        ('Public Relation'), 
+        ('Creative Design'), 
+        ('Copywriting'),
+        ('Core Team'),
+        ('Technical Division'),
+        ('Non-Technical Division')
       ON CONFLICT (name) DO NOTHING;
     `);
   } catch (err) {
@@ -63,7 +78,7 @@ const createTestUser = async ({
   name = 'Test User',
   role = 'MEMBER',
   password = 'Password123!',
-  division_name = 'Technology',
+  division_name = 'Web Development',
 } = {}) => {
   const divRes = await query('SELECT id FROM divisions WHERE name = $1 LIMIT 1', [division_name]);
   const division_id = divRes.rows[0]?.id || null;
