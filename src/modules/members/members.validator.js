@@ -66,7 +66,7 @@ const createMemberValidator = [
     .withMessage('Email is required')
     .isEmail()
     .withMessage('Must be a valid email address')
-    .normalizeEmail(),
+    .normalizeEmail({ gmail_remove_dots: false, gmail_remove_subaddress: false }),
   body('password')
     .optional({ checkFalsy: true })
     .isLength({ min: 6 })
