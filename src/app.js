@@ -20,14 +20,20 @@ const registrationsRouter = require('./modules/registrations/registrations.route
 const attendancesRouter = require('./modules/attendances/attendances.router');
 const auditLogsRouter = require('./modules/audit-logs/audit-logs.router');
 const divisionsRouter = require('./modules/divisions/divisions.router');
+const swaggerHtml = require('./modules/docs/swaggerHtml');
+const openapiSpec = require('../docs/openapiSpec');
 
 const app = express();
 
 // Trust reverse proxy headers (Vercel, Render, Railway, Cloud Run) for accurate IP rate limiting
 app.set('trust proxy', 1);
 
-// Security HTTP headers
-app.use(helmet());
+// Security HTTP headers (disable CSP so Swagger UI CDN assets load seamlessly)
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  })
+);
 
 // Parse comma-separated allowed origins (normalized without trailing slashes)
 const allowedOrigins = env.FRONTEND_URL.split(',')
@@ -75,6 +81,17 @@ app.get('/health', (req, res) => {
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// OpenAPI YAML specification endpoint
+app.get('/openapi.yaml', (req, res) => {
+  res.type('text/yaml').send(openapiSpec);
+});
+
+// Swagger UI interactive documentation
+app.get(['/', '/docs'], (req, res) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(swaggerHtml);
 });
 
 // Mount application API modules
