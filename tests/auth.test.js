@@ -28,7 +28,7 @@ describe('Auth Module & Role Authorization Tests', () => {
       const res = await request(app)
         .post('/api/auth/register')
         .send({
-          email: 'newuser@gdgoc.unsri.ac.id',
+          email: 'newuser.gdgoc@gmail.com',
           password: 'Password123!',
           name: 'New Registered Member',
           nim: '09021282126099',
@@ -37,7 +37,7 @@ describe('Auth Module & Role Authorization Tests', () => {
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.user.email).toBe('newuser@gdgoc.unsri.ac.id');
+      expect(res.body.data.user.email).toBe('newuser.gdgoc@gmail.com');
       expect(res.body.data.user.role).toBe('MEMBER');
       expect(res.body.data.accessToken).toBeDefined();
       expect(res.body.data.refreshToken).toBeDefined();
@@ -61,7 +61,7 @@ describe('Auth Module & Role Authorization Tests', () => {
       const res = await request(app)
         .post('/api/auth/register')
         .send({
-          email: 'newuser@gdgoc.unsri.ac.id',
+          email: 'newuser.gdgoc@gmail.com',
           password: 'Password123!',
           name: 'Duplicate Member',
         });
@@ -76,7 +76,7 @@ describe('Auth Module & Role Authorization Tests', () => {
       const res = await request(app)
         .post('/api/auth/login')
         .send({
-          email: 'newuser@gdgoc.unsri.ac.id',
+          email: 'newuser.gdgoc@gmail.com',
           password: 'Password123!',
         });
 
@@ -91,7 +91,7 @@ describe('Auth Module & Role Authorization Tests', () => {
       const res = await request(app)
         .post('/api/auth/login')
         .send({
-          email: 'newuser@gdgoc.unsri.ac.id',
+          email: 'newuser.gdgoc@gmail.com',
           password: 'WrongPassword!',
         });
 
