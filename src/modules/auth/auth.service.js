@@ -1,9 +1,3 @@
-/**
- * @file auth.service.js
- * @description Business logic for user registration, authentication, Google OAuth via Supabase,
- * and JWT token management.
- */
-
 const crypto = require('crypto');
 const { query } = require('../../config/database');
 const env = require('../../config/env');
@@ -14,10 +8,6 @@ const {
   verifyRefreshToken,
 } = require('../../utils/jwt');
 
-/**
- * Register a new member.
- * Role is strictly enforced as MEMBER regardless of any requested role (Mass assignment prevention).
- */
 const register = async ({ email, password, name, nim = null, phone = null, division_id = null }) => {
   const existingUserResult = await query(
     'SELECT id, is_deleted FROM users WHERE email = $1',
@@ -73,9 +63,6 @@ const register = async ({ email, password, name, nim = null, phone = null, divis
   };
 };
 
-/**
- * Authenticate user credentials and issue JWT tokens.
- */
 const login = async ({ email, password }) => {
   const result = await query(
     `SELECT u.id, u.email, u.name, u.password_hash, u.role, u.division_id, u.nim, u.phone, u.is_deleted,
@@ -116,14 +103,10 @@ const login = async ({ email, password }) => {
   };
 };
 
-/**
- * Authenticate or register user via Google OAuth (verified through Supabase Auth API).
- */
 const loginWithGoogle = async ({ supabase_token, email: fallbackEmail, name: fallbackName }) => {
   let verifiedEmail = fallbackEmail;
   let verifiedName = fallbackName;
 
-  // Verify token directly against Supabase Auth server when configured
   if (
     env.SUPABASE_URL &&
     env.SUPABASE_ANON_KEY &&
@@ -158,7 +141,6 @@ const loginWithGoogle = async ({ supabase_token, email: fallbackEmail, name: fal
     throw err;
   }
 
-  // Check if user already exists in PostgreSQL
   const existingResult = await query(
     `SELECT u.id, u.email, u.name, u.role, u.division_id, u.nim, u.phone, u.is_deleted,
             d.name AS division_name
@@ -178,7 +160,6 @@ const loginWithGoogle = async ({ supabase_token, email: fallbackEmail, name: fal
   }
 
   if (!user) {
-    // Auto-provision new OAuth user with default MEMBER role and random unguessable password hash
     const randomPassword = crypto.randomBytes(32).toString('hex');
     const passwordHash = await hashPassword(randomPassword);
     const insertRes = await query(
@@ -202,9 +183,6 @@ const loginWithGoogle = async ({ supabase_token, email: fallbackEmail, name: fal
   };
 };
 
-/**
- * Reissue tokens using a valid refresh token.
- */
 const refresh = async (token) => {
   try {
     const payload = verifyRefreshToken(token);
@@ -240,9 +218,6 @@ const refresh = async (token) => {
   }
 };
 
-/**
- * Fetch profile information for the current authenticated user.
- */
 const getMe = async (userId) => {
   const result = await query(
     `SELECT u.id, u.email, u.name, u.role, u.division_id, u.nim, u.phone, u.created_at, u.updated_at,

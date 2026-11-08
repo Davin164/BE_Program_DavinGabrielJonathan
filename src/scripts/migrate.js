@@ -1,9 +1,3 @@
-/**
- * @file migrate.js
- * @description Migration runner script.
- * Reads SQL migration files from the migrations directory in numerical order and applies them.
- */
-
 const fs = require('fs');
 const path = require('path');
 const { pool } = require('../config/database');

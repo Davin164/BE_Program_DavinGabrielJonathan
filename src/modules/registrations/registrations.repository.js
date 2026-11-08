@@ -1,15 +1,5 @@
-/**
- * @file registrations.repository.js
- * @description Database access layer for event registrations.
- */
-
 const { query } = require('../../config/database');
 
-/**
- * Retrieve all registrations for a specific event.
- * @param {string} eventId - UUID of event
- * @returns {Promise<Array<object>>} List of registered participants
- */
 const findByEventId = async (eventId) => {
   const sql = `
     SELECT r.id, r.user_id, r.event_id, r.registered_at,
@@ -26,11 +16,6 @@ const findByEventId = async (eventId) => {
   return result.rows;
 };
 
-/**
- * Retrieve all registrations belonging to a specific user.
- * @param {string} userId - UUID of user
- * @returns {Promise<Array<object>>}
- */
 const findByUserId = async (userId) => {
   const sql = `
     SELECT r.id, r.event_id, r.registered_at,
@@ -45,12 +30,6 @@ const findByUserId = async (userId) => {
   return result.rows;
 };
 
-/**
- * Delete a user's registration for an event.
- * @param {string} userId
- * @param {string} eventId
- * @returns {Promise<boolean>}
- */
 const deleteRegistration = async (userId, eventId) => {
   const sql = `
     DELETE FROM registrations

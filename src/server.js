@@ -1,5 +1,3 @@
-// HTTP server entry point GDGoC UNSRI API
-
 const app = require('./app');
 const env = require('./config/env');
 const { pool } = require('./config/database');

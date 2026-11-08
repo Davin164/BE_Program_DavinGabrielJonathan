@@ -1,8 +1,3 @@
-/**
- * @file events.router.js
- * @description Express router for events, including nested registration and attendance routes.
- */
-
 const { Router } = require('express');
 const eventsController = require('./events.controller');
 const registrationsController = require('../registrations/registrations.controller');
@@ -29,11 +24,9 @@ const CORE_ROLES = [
   'CORE_TEAM',
 ];
 
-// Public / Semi-public event exploration (optionalAuth identifies caller if logged in)
 router.get('/', optionalAuth, listEventsValidator, validate, eventsController.list);
 router.get('/:id', optionalAuth, eventIdParamValidator, validate, eventsController.getById);
 
-// Event lifecycle management (Chapter leadership & core team)
 router.post(
   '/',
   authenticate,
@@ -61,7 +54,6 @@ router.delete(
   eventsController.deleteEvent
 );
 
-// Event Registration routes
 router.post(
   '/:id/register',
   authenticate,
@@ -87,7 +79,6 @@ router.get(
   registrationsController.getEventRegistrations
 );
 
-// Event Attendance check-in routes
 router.post(
   '/:id/checkin',
   authenticate,

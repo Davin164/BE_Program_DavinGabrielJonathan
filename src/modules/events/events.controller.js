@@ -1,14 +1,6 @@
-/**
- * @file events.controller.js
- * @description Controller handling incoming requests for event endpoints.
- */
-
 const eventsService = require('./events.service');
 const { success } = require('../../utils/apiResponse');
 
-/**
- * List events.
- */
 const list = async (req, res, next) => {
   try {
     const { page, limit, search, upcoming, sort, order } = req.query;
@@ -26,9 +18,6 @@ const list = async (req, res, next) => {
   }
 };
 
-/**
- * Get event details by ID.
- */
 const getById = async (req, res, next) => {
   try {
     const event = await eventsService.getEventById(req.params.id, req.user?.id || null);
@@ -38,9 +27,6 @@ const getById = async (req, res, next) => {
   }
 };
 
-/**
- * Create a new event.
- */
 const create = async (req, res, next) => {
   try {
     const { title, description, quota, start_time, end_time, location } = req.body;
@@ -55,9 +41,6 @@ const create = async (req, res, next) => {
   }
 };
 
-/**
- * Update an existing event.
- */
 const update = async (req, res, next) => {
   try {
     const { title, description, quota, start_time, end_time, location } = req.body;
@@ -73,9 +56,6 @@ const update = async (req, res, next) => {
   }
 };
 
-/**
- * Delete an event.
- */
 const deleteEvent = async (req, res, next) => {
   try {
     const result = await eventsService.deleteEvent(req.params.id, req.user, req.ip);

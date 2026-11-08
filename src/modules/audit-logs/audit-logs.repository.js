@@ -1,20 +1,5 @@
-/**
- * @file audit-logs.repository.js
- * @description Database access layer for audit logs.
- */
-
 const { query } = require('../../config/database');
 
-/**
- * Retrieve paginated audit logs with actor user details and optional filters.
- * @param {object} params
- * @param {number} [params.page=1]
- * @param {number} [params.limit=20]
- * @param {string} [params.actor_id]
- * @param {string} [params.action]
- * @param {string} [params.target_table]
- * @returns {Promise<{ logs: Array<object>, total: number, page: number, limit: number, totalPages: number }>}
- */
 const findAuditLogs = async ({
   page = 1,
   limit = 20,

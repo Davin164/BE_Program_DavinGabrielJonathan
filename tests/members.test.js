@@ -1,8 +1,3 @@
-/**
- * @file members.test.js
- * @description Integration tests for members management and IDOR security checks.
- */
-
 const request = require('supertest');
 const app = require('../src/app');
 const { pool, initTestDb, cleanTestDb, createTestUser, query } = require('./testHelper');
@@ -29,8 +24,7 @@ describe('Members Module & IDOR Security Tests', () => {
     member2Token = m2.token;
   });
 
-
-  describe('GET /api/members', () => {
+describe('GET /api/members', () => {
     it('should retrieve a paginated list of active members', async () => {
       const res = await request(app)
         .get('/api/members?page=1&limit=10&sort=name&order=asc')
@@ -90,7 +84,6 @@ describe('Members Module & IDOR Security Tests', () => {
       expect(res.body.success).toBe(true);
       expect(res.body.data.role).toBe('CORE_TEAM');
 
-      // Verify audit log entry was written
       const auditRes = await query(
         `SELECT * FROM audit_logs WHERE target_id = $1 AND action = 'ROLE_CHANGE'`,
         [member2.id]
@@ -107,7 +100,6 @@ describe('Members Module & IDOR Security Tests', () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
 
-      // Verify user is soft-deleted
       const userRes = await query('SELECT is_deleted, deleted_at FROM users WHERE id = $1', [member2.id]);
       expect(userRes.rows[0].is_deleted).toBe(true);
       expect(userRes.rows[0].deleted_at).not.toBeNull();

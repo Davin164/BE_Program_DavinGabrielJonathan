@@ -1,8 +1,3 @@
-/**
- * @file auth.test.js
- * @description Integration tests for authentication and role authorization checks.
- */
-
 const request = require('supertest');
 const app = require('../src/app');
 const { pool, initTestDb, cleanTestDb, createTestUser } = require('./testHelper');
@@ -22,8 +17,7 @@ describe('Auth Module & Role Authorization Tests', () => {
     leadToken = lead.token;
   });
 
-
-  describe('POST /api/auth/register', () => {
+describe('POST /api/auth/register', () => {
     it('should successfully register a new member with default role MEMBER', async () => {
       const res = await request(app)
         .post('/api/auth/register')

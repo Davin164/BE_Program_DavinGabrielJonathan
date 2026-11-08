@@ -1,15 +1,5 @@
-/**
- * @file validate.js
- * @description Input validation runner middleware using express-validator.
- * Extracts validation results and returns a structured 400 error response if invalid.
- */
-
 const { validationResult } = require('express-validator');
 
-/**
- * Validation runner middleware.
- * Checks express-validator results on the current request.
- */
 const validate = (req, res, next) => {
   const errors = validationResult(req);
   if (errors.isEmpty()) {

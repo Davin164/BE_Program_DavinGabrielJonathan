@@ -1,10 +1,3 @@
-/**
- * @file database.js
- * @description PostgreSQL connection pool setup using the pg library.
- * Parameterized queries are enforced; no ORM is used for security and explicit control.
- * Automatically enables TLS/SSL when connecting to cloud PostgreSQL (e.g. Supabase, Railway, Render).
- */
-
 const { Pool } = require('pg');
 const env = require('./env');
 
@@ -14,11 +7,9 @@ const isLocalDb =
   env.DATABASE_URL.includes('@db:');
 
 if (!isLocalDb) {
-  // Supabase PostgreSQL pooler uses self-signed / intermediate certificates
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 }
 
-// Strip query parameters from connection string so pg doesn't override explicit ssl settings
 const cleanConnectionString = env.DATABASE_URL.replace(/[?&]sslmode=[^&]+/g, '');
 
 const pool = new Pool({
@@ -33,19 +24,8 @@ pool.on('error', (err) => {
   console.error('Unexpected error on idle PostgreSQL client:', err.message);
 });
 
-/**
- * Execute a parameterized query using the pool.
- * @param {string} text - SQL query string with $1, $2 placeholders
- * @param {Array<any>} [params] - Parameter values
- * @returns {Promise<import('pg').QueryResult>} Query result
- */
 const query = (text, params) => pool.query(text, params);
 
-/**
- * Acquire a client from the pool (for multi-statement transactions).
- * Remember to call client.release() when done!
- * @returns {Promise<import('pg').PoolClient>} Client instance
- */
 const getClient = () => pool.connect();
 
 module.exports = {

@@ -1,5 +1,3 @@
-// Template HTML untuk halaman Swagger UI CDN
-
 const swaggerHtml = `<!DOCTYPE html>
 <html lang="id">
 <head>

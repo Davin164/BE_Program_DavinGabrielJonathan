@@ -1,25 +1,13 @@
-/**
- * @file members.service.js
- * @description Business logic for member management, enforcing RBAC, IDOR prevention,
- * and security audit logging for sensitive mutations (PDF Back-End requirement).
- */
-
 const membersRepository = require('./members.repository');
 const { hashPassword } = require('../../utils/password');
 const { createAuditLog } = require('../../utils/auditLogger');
 
 const isLeader = (role) => role === 'LEAD' || role === 'CO_LEAD';
 
-/**
- * Retrieve paginated list of members.
- */
 const getMembers = async (queryOptions) => {
   return membersRepository.findMembers(queryOptions);
 };
 
-/**
- * Create a new member (LEAD and CO_LEAD).
- */
 const createMember = async (
   { name, email, password, role = 'MEMBER', division_id = null, nim = null, phone = null },
   currentUser,
@@ -64,9 +52,6 @@ const createMember = async (
   return created;
 };
 
-/**
- * Retrieve single member details by ID.
- */
 const getMemberById = async (id) => {
   const member = await membersRepository.findById(id);
 
@@ -80,10 +65,6 @@ const getMemberById = async (id) => {
   return member;
 };
 
-/**
- * Update member profile fields.
- * Enforces strict IDOR and division boundary permissions.
- */
 const updateProfile = async (targetId, fields, currentUser) => {
   const targetUser = await membersRepository.findById(targetId);
 
@@ -94,7 +75,6 @@ const updateProfile = async (targetId, fields, currentUser) => {
     throw err;
   }
 
-  // IDOR Prevention: A MEMBER can only modify their own profile
   if (currentUser.role === 'MEMBER' && currentUser.id !== targetId) {
     const err = new Error('You can only modify your own profile.');
     err.statusCode = 403;
@@ -102,7 +82,6 @@ const updateProfile = async (targetId, fields, currentUser) => {
     throw err;
   }
 
-  // DIVISION_HEAD can only modify their own profile or members within their own division
   if (currentUser.role === 'DIVISION_HEAD' && currentUser.id !== targetId) {
     if (!currentUser.division_id || targetUser.division_id !== currentUser.division_id) {
       const err = new Error('You can only manage members within your own division.');
@@ -118,7 +97,6 @@ const updateProfile = async (targetId, fields, currentUser) => {
     }
   }
 
-  // Only LEAD or CO_LEAD can change division_id of other users or themselves
   const sanitizedFields = { ...fields };
   if (!isLeader(currentUser.role)) {
     delete sanitizedFields.division_id;
@@ -128,10 +106,6 @@ const updateProfile = async (targetId, fields, currentUser) => {
   return updatedUser;
 };
 
-/**
- * Update user role (LEAD and CO_LEAD).
- * Automatically records a security audit log entry (ROLE_CHANGE).
- */
 const updateRole = async (targetId, newRole, currentUser, ipAddress = null) => {
   if (!isLeader(currentUser.role)) {
     const err = new Error('Forbidden: Only chapter leadership can assign user roles.');
@@ -175,9 +149,6 @@ const updateRole = async (targetId, newRole, currentUser, ipAddress = null) => {
   return updatedUser;
 };
 
-/**
- * Soft delete a member (LEAD and CO_LEAD).
- */
 const deleteMember = async (targetId, currentUser, ipAddress = null) => {
   if (!isLeader(currentUser.role)) {
     const err = new Error('Forbidden: Only chapter leadership can deactivate accounts.');

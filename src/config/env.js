@@ -1,16 +1,9 @@
-/**
- * @file env.js
- * @description Validates and exports application environment variables.
- */
-
 const dotenv = require('dotenv');
 
-// Load environment variables from .env file
 dotenv.config();
 
 const requiredEnvVars = ['JWT_SECRET', 'JWT_REFRESH_SECRET'];
 
-// Validate required env vars in production
 if (process.env.NODE_ENV === 'production') {
   for (const envVar of requiredEnvVars) {
     if (!process.env[envVar]) {

@@ -1,18 +1,9 @@
-/**
- * @file rateLimiter.js
- * @description Rate limiting middleware configurations to prevent brute force and DDoS attacks.
- * Automatically bypassed in test environment to avoid hindering automated test suites.
- */
-
 const rateLimit = require('express-rate-limit');
 const env = require('../config/env');
 const { error } = require('../utils/apiResponse');
 
 const isTest = env.NODE_ENV === 'test';
 
-/**
- * Custom response handler for rate limit violations.
- */
 const rateLimitHandler = (req, res) => {
   return error(
     res,
@@ -22,12 +13,8 @@ const rateLimitHandler = (req, res) => {
   );
 };
 
-/**
- * Strict limiter for sensitive authentication endpoints (login, register).
- * Allows 15 requests per 15 minutes per IP.
- */
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 15,
   standardHeaders: true,
   legacyHeaders: false,
@@ -35,12 +22,8 @@ const authLimiter = rateLimit({
   skip: () => isTest,
 });
 
-/**
- * Standard limiter for general API endpoints.
- * Allows 100 requests per 15 minutes per IP.
- */
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,

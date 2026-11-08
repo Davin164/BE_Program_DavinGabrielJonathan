@@ -1,16 +1,5 @@
-/**
- * @file attendances.repository.js
- * @description Database access layer for attendance records.
- */
-
 const { query } = require('../../config/database');
 
-/**
- * Record attendance check-in idempotently using ON CONFLICT DO NOTHING.
- * @param {string} userId - UUID
- * @param {string} eventId - UUID
- * @returns {Promise<{ attendance: object, created: boolean }>}
- */
 const recordCheckIn = async (userId, eventId) => {
   const insertSql = `
     INSERT INTO attendances (user_id, event_id)
@@ -24,7 +13,6 @@ const recordCheckIn = async (userId, eventId) => {
     return { attendance: insertResult.rows[0], created: true };
   }
 
-  // Already checked in: fetch existing record to return idempotently
   const selectSql = `
     SELECT id, user_id, event_id, checked_in_at
     FROM attendances
@@ -34,9 +22,6 @@ const recordCheckIn = async (userId, eventId) => {
   return { attendance: existingResult.rows[0], created: false };
 };
 
-/**
- * Find all attendance records for an event.
- */
 const findByEventId = async (eventId) => {
   const sql = `
     SELECT a.id, a.user_id, a.event_id, a.checked_in_at,
@@ -52,9 +37,6 @@ const findByEventId = async (eventId) => {
   return result.rows;
 };
 
-/**
- * Find all attendance records for a user.
- */
 const findByUserId = async (userId) => {
   const sql = `
     SELECT a.id, a.event_id, a.checked_in_at,

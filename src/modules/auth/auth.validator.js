@@ -1,8 +1,3 @@
-/**
- * @file auth.validator.js
- * @description Input validation chains for authentication endpoints.
- */
-
 const { body } = require('express-validator');
 
 const registerValidator = [

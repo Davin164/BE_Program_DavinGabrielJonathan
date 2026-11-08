@@ -1,9 +1,3 @@
-/**
- * @file seed.js
- * @description Database seeder populating initial test accounts across the 3 role tiers
- * (LEAD, DIVISION_HEAD, MEMBER) and initial sample events.
- */
-
 const bcrypt = require('bcrypt');
 const { pool } = require('../src/config/database');
 const env = require('../src/config/env');
@@ -15,7 +9,6 @@ const seed = async () => {
   try {
     await client.query('BEGIN');
 
-    // Data divisi
     const divisionsQuery = `
       INSERT INTO divisions (name, description) VALUES
         ('Machine Learning', 'AI, Deep Learning, computer vision, NLP, and predictive modeling'),
@@ -34,7 +27,6 @@ const seed = async () => {
     `;
     await client.query(divisionsQuery);
 
-    // Fetch division IDs
     const divResult = await client.query('SELECT id, name FROM divisions');
     const divisionMap = {};
     divResult.rows.forEach((row) => {
@@ -43,7 +35,6 @@ const seed = async () => {
 
     const passwordHash = await bcrypt.hash('Password123!', env.BCRYPT_ROUNDS);
 
-    // Akun default untuk setiap tier role
     const users = [
       {
         email: 'lead.gdgoc@gmail.com',
@@ -150,7 +141,6 @@ const seed = async () => {
     const leadId = insertedUsers['lead.gdgoc@gmail.com'];
     const techId = insertedUsers['core.tech@gmail.com'];
 
-    // Sample events (1 selesai, 2 upcoming)
     const now = new Date();
     const pastEventStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const pastEventEnd = new Date(pastEventStart.getTime() + 3 * 60 * 60 * 1000);

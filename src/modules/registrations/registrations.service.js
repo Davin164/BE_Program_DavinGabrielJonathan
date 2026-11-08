@@ -1,16 +1,12 @@
-// Service pendaftaran event
-
 const { pool } = require('../../config/database');
 const registrationsRepository = require('./registrations.repository');
 
-// Pendaftaran event dengan row-level lock (FOR UPDATE) agar kuota aman saat concurrent request
 const registerForEvent = async (userId, eventId) => {
   const client = await pool.connect();
 
   try {
     await client.query('BEGIN');
 
-    // Kunci baris event selama pengecekan kuota
     const eventResult = await client.query(
       `SELECT id, title, quota, start_time, end_time, is_deleted
        FROM events
@@ -28,7 +24,6 @@ const registerForEvent = async (userId, eventId) => {
 
     const event = eventResult.rows[0];
 
-    // Cek apakah event sudah selesai
     if (new Date(event.end_time) < new Date()) {
       const err = new Error('Cannot register for an event that has already ended.');
       err.statusCode = 400;
@@ -36,7 +31,6 @@ const registerForEvent = async (userId, eventId) => {
       throw err;
     }
 
-    // Hitung peserta yang sudah terdaftar
     const currentRegistrationsResult = await client.query(
       'SELECT COUNT(*)::int AS count FROM registrations WHERE event_id = $1',
       [eventId]
@@ -50,7 +44,6 @@ const registerForEvent = async (userId, eventId) => {
       throw err;
     }
 
-    // Cek apakah user sudah daftar sebelumnya
     const existingRegistration = await client.query(
       'SELECT id FROM registrations WHERE user_id = $1 AND event_id = $2',
       [userId, eventId]
@@ -63,7 +56,6 @@ const registerForEvent = async (userId, eventId) => {
       throw err;
     }
 
-    // Simpan data pendaftaran
     const insertResult = await client.query(
       `INSERT INTO registrations (user_id, event_id)
        VALUES ($1, $2)
@@ -81,9 +73,6 @@ const registerForEvent = async (userId, eventId) => {
   }
 };
 
-/**
- * Cancel a registration.
- */
 const cancelRegistration = async (userId, eventId) => {
   const deleted = await registrationsRepository.deleteRegistration(userId, eventId);
   if (!deleted) {
@@ -95,16 +84,10 @@ const cancelRegistration = async (userId, eventId) => {
   return { message: 'Registration successfully cancelled.' };
 };
 
-/**
- * Get all registrations for an event (Restricted to LEAD or creator/division head).
- */
 const getEventRegistrations = async (eventId, currentUser) => {
   return registrationsRepository.findByEventId(eventId);
 };
 
-/**
- * Get registrations for the logged in user.
- */
 const getMyRegistrations = async (userId) => {
   return registrationsRepository.findByUserId(userId);
 };

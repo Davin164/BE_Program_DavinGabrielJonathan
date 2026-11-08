@@ -1,8 +1,3 @@
-/**
- * @file events.validator.js
- * @description Input validation chains for event management endpoints.
- */
-
 const { body, query, param } = require('express-validator');
 
 const eventIdParamValidator = [

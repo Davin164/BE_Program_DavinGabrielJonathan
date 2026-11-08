@@ -1,8 +1,3 @@
-/**
- * @file events.test.js
- * @description Integration tests for events creation, validation, and listing.
- */
-
 const request = require('supertest');
 const app = require('../src/app');
 const { pool, initTestDb, cleanTestDb, createTestUser } = require('./testHelper');
@@ -26,8 +21,7 @@ describe('Events Module Tests', () => {
     memberToken = member.token;
   });
 
-
-  describe('POST /api/events', () => {
+describe('POST /api/events', () => {
     it('should forbid a MEMBER from creating an event', async () => {
       const res = await request(app)
         .post('/api/events')

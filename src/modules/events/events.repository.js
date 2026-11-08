@@ -1,13 +1,5 @@
-/**
- * @file events.repository.js
- * @description Database access layer for events table with registration count calculations.
- */
-
 const { query } = require('../../config/database');
 
-/**
- * Retrieve paginated events list with registration counts and remaining quota.
- */
 const findEvents = async ({
   page = 1,
   limit = 10,
@@ -75,9 +67,6 @@ const findEvents = async ({
   };
 };
 
-/**
- * Retrieve single event by ID with registration metrics and caller status.
- */
 const findById = async (id, currentUserId = null) => {
   const params = [id];
   let userStatusSelect = 'FALSE AS is_registered, FALSE AS is_checked_in';
@@ -109,9 +98,6 @@ const findById = async (id, currentUserId = null) => {
   return result.rows[0] || null;
 };
 
-/**
- * Insert a new event record.
- */
 const create = async ({ title, description, quota, start_time, end_time, location, created_by }) => {
   const sql = `
     INSERT INTO events (
@@ -140,9 +126,6 @@ const create = async ({ title, description, quota, start_time, end_time, locatio
   return result.rows[0];
 };
 
-/**
- * Update event fields.
- */
 const update = async (id, fields) => {
   const allowedKeys = ['title', 'description', 'quota', 'start_time', 'end_time', 'location'];
   const keys = Object.keys(fields).filter((k) => allowedKeys.includes(k) && fields[k] !== undefined);
@@ -171,9 +154,6 @@ const update = async (id, fields) => {
   return result.rows[0] || null;
 };
 
-/**
- * Soft delete event.
- */
 const softDelete = async (id) => {
   const sql = `
     UPDATE events

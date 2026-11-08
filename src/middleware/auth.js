@@ -1,18 +1,7 @@
-/**
- * @file auth.js
- * @description JWT authentication middleware that verifies access tokens
- * and loads fresh, non-deleted user data from the database.
- */
-
 const { verifyAccessToken } = require('../utils/jwt');
 const { query } = require('../config/database');
 const { error } = require('../utils/apiResponse');
 
-/**
- * Middleware to require and verify a Bearer JWT access token.
- * Attaches the authenticated user to req.user.
- * Rejects if user is missing, invalid token, or user is soft-deleted.
- */
 const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
@@ -25,7 +14,6 @@ const authenticate = async (req, res, next) => {
   try {
     const payload = verifyAccessToken(token);
 
-    // Fetch fresh user data to verify account is still active and not soft-deleted
     const userResult = await query(
       `SELECT u.id, u.email, u.name, u.role, u.division_id, u.nim, u.phone, u.is_deleted,
               d.name AS division_name
@@ -51,10 +39,6 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-/**
- * Optional authentication middleware.
- * Attaches req.user if a valid token is present; proceeds without req.user otherwise.
- */
 const optionalAuth = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 

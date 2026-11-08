@@ -1,8 +1,3 @@
-/**
- * @file registrations.test.js
- * @description Concurrency and race condition testing for event quota enforcement.
- */
-
 const request = require('supertest');
 const app = require('../src/app');
 const { pool, initTestDb, cleanTestDb, createTestUser, createTestEvent, query } = require('./testHelper');
@@ -34,9 +29,7 @@ describe('Event Registrations & Concurrency Quota Tests', () => {
     token3 = u3.token;
   });
 
-
-  beforeEach(async () => {
-    // Create an event with quota = 1 before each race test
+beforeEach(async () => {
     const ev = await createTestEvent({
       title: `Race Condition Event ${Date.now()}`,
       quota: 1,
@@ -46,7 +39,6 @@ describe('Event Registrations & Concurrency Quota Tests', () => {
   });
 
   it('should only allow one registration when two concurrent requests hit last slot', async () => {
-    // Send 2 simultaneous register requests to an event with quota = 1
     const [res1, res2] = await Promise.all([
       request(app)
         .post(`/api/events/${eventId}/register`)
@@ -62,7 +54,6 @@ describe('Event Registrations & Concurrency Quota Tests', () => {
     expect(successes).toBe(1);
     expect(failures).toBe(1);
 
-    // Verify database has exactly 1 registration row
     const countRes = await query(
       'SELECT COUNT(*)::int AS count FROM registrations WHERE event_id = $1',
       [eventId]

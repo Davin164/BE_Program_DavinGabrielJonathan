@@ -1,14 +1,6 @@
-/**
- * @file registrations.controller.js
- * @description Controller handling incoming requests for registration endpoints.
- */
-
 const registrationsService = require('./registrations.service');
 const { success } = require('../../utils/apiResponse');
 
-/**
- * Register current user for an event.
- */
 const register = async (req, res, next) => {
   try {
     const registration = await registrationsService.registerForEvent(
@@ -21,9 +13,6 @@ const register = async (req, res, next) => {
   }
 };
 
-/**
- * Cancel current user's registration.
- */
 const cancelRegistration = async (req, res, next) => {
   try {
     const result = await registrationsService.cancelRegistration(
@@ -36,9 +25,6 @@ const cancelRegistration = async (req, res, next) => {
   }
 };
 
-/**
- * Get all registrations for an event (Leadership only).
- */
 const getEventRegistrations = async (req, res, next) => {
   try {
     const registrations = await registrationsService.getEventRegistrations(
@@ -51,9 +37,6 @@ const getEventRegistrations = async (req, res, next) => {
   }
 };
 
-/**
- * Get current authenticated user's registrations.
- */
 const getMyRegistrations = async (req, res, next) => {
   try {
     const registrations = await registrationsService.getMyRegistrations(req.user.id);

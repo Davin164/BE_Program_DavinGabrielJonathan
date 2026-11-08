@@ -1,15 +1,6 @@
-/**
- * @file members.controller.js
- * @description Controller handling incoming requests for members endpoints.
- * Sanitizes request payload to prevent mass-assignment attacks.
- */
-
 const membersService = require('./members.service');
 const { success } = require('../../utils/apiResponse');
 
-/**
- * List members with filtering, search, sorting, and pagination.
- */
 const list = async (req, res, next) => {
   try {
     const { page, limit, search, role, division_id, sort, order } = req.query;
@@ -35,9 +26,6 @@ const list = async (req, res, next) => {
   }
 };
 
-/**
- * Create a new member (LEAD only).
- */
 const create = async (req, res, next) => {
   try {
     const { name, email, password, role, division_id, nim, phone } = req.body;
@@ -52,9 +40,6 @@ const create = async (req, res, next) => {
   }
 };
 
-/**
- * Get member detail by ID.
- */
 const getById = async (req, res, next) => {
   try {
     const member = await membersService.getMemberById(req.params.id);
@@ -64,10 +49,6 @@ const getById = async (req, res, next) => {
   }
 };
 
-/**
- * Update member profile.
- * Strictly whitelists allowed payload fields.
- */
 const update = async (req, res, next) => {
   try {
     const { name, phone, nim, division_id } = req.body;
@@ -83,9 +64,6 @@ const update = async (req, res, next) => {
   }
 };
 
-/**
- * Update member role (LEAD only).
- */
 const updateRole = async (req, res, next) => {
   try {
     const { role } = req.body;
@@ -102,9 +80,6 @@ const updateRole = async (req, res, next) => {
   }
 };
 
-/**
- * Soft delete member (LEAD only).
- */
 const deleteMember = async (req, res, next) => {
   try {
     const result = await membersService.deleteMember(req.params.id, req.user, req.ip);

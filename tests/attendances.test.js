@@ -1,11 +1,3 @@
-/**
- * @file attendances.test.js
- * @description Automated tests for event attendance:
- * - Time window enforcement (only valid during event duration)
- * - Registration check (only for registered participants)
- * - Idempotency (repeated check-in does not duplicate record or crash)
- */
-
 const request = require('supertest');
 const app = require('../src/app');
 const { pool, initTestDb, cleanTestDb, createTestUser, createTestEvent, query } = require('./testHelper');
@@ -28,7 +20,6 @@ describe('Event Attendance & Idempotency Tests', () => {
     memberId = member.user.id;
     memberToken = member.token;
 
-    // Event aktif (sedang berlangsung)
     const activeEv = await createTestEvent({
       title: 'Active Ongoing Workshop',
       quota: 50,
@@ -38,7 +29,6 @@ describe('Event Attendance & Idempotency Tests', () => {
     });
     activeEventId = activeEv.id;
 
-    // Event masa depan (belum dimulai)
     const futureEv = await createTestEvent({
       title: 'Future Workshop',
       quota: 50,
@@ -49,8 +39,7 @@ describe('Event Attendance & Idempotency Tests', () => {
     futureEventId = futureEv.id;
   });
 
-
-  it('should reject check-in if user is not registered for the event', async () => {
+it('should reject check-in if user is not registered for the event', async () => {
     const res = await request(app)
       .post(`/api/events/${activeEventId}/checkin`)
       .set('Authorization', `Bearer ${memberToken}`);
@@ -60,7 +49,6 @@ describe('Event Attendance & Idempotency Tests', () => {
   });
 
   it('should reject check-in if event is outside the active time window', async () => {
-    // Register for the future event first
     await request(app)
       .post(`/api/events/${futureEventId}/register`)
       .set('Authorization', `Bearer ${memberToken}`);
@@ -74,12 +62,10 @@ describe('Event Attendance & Idempotency Tests', () => {
   });
 
   it('should allow check-in for registered user within window and remain idempotent on duplicates', async () => {
-    // Daftar ke event aktif
     await request(app)
       .post(`/api/events/${activeEventId}/register`)
       .set('Authorization', `Bearer ${memberToken}`);
 
-    // Check-in pertama
     const res1 = await request(app)
       .post(`/api/events/${activeEventId}/checkin`)
       .set('Authorization', `Bearer ${memberToken}`);
@@ -87,7 +73,6 @@ describe('Event Attendance & Idempotency Tests', () => {
     expect([200, 201]).toContain(res1.status);
     expect(res1.body.success).toBe(true);
 
-    // Check-in kedua (duplikat idempoten)
     const res2 = await request(app)
       .post(`/api/events/${activeEventId}/checkin`)
       .set('Authorization', `Bearer ${memberToken}`);
@@ -96,7 +81,6 @@ describe('Event Attendance & Idempotency Tests', () => {
     expect(res2.body.success).toBe(true);
     expect(res2.body.data.alreadyCheckedIn).toBe(true);
 
-    // Data di database tetap tepat 1 baris
     const count = await query(
       'SELECT COUNT(*)::int AS count FROM attendances WHERE user_id = $1 AND event_id = $2',
       [memberId, activeEventId]

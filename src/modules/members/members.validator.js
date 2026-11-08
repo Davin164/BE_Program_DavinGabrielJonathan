@@ -1,8 +1,3 @@
-/**
- * @file members.validator.js
- * @description Input validation chains for member management endpoints.
- */
-
 const { query, body, param } = require('express-validator');
 
 const VALID_ROLES = [

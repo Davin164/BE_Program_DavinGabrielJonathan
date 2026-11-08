@@ -1,14 +1,6 @@
-/**
- * @file audit-logs.controller.js
- * @description Controller handling incoming requests for security audit log inspection.
- */
-
 const auditLogsRepository = require('./audit-logs.repository');
 const { success } = require('../../utils/apiResponse');
 
-/**
- * List audit logs with pagination and filters (LEAD only).
- */
 const list = async (req, res, next) => {
   try {
     const { page, limit, actor_id, action, target_table } = req.query;

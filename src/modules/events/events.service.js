@@ -1,22 +1,10 @@
-/**
- * @file events.service.js
- * @description Business logic for events, enforcing RBAC (LEAD and DIVISION_HEAD creation)
- * and event ownership checks for modifications.
- */
-
 const eventsRepository = require('./events.repository');
 const { createAuditLog } = require('../../utils/auditLogger');
 
-/**
- * List events with filtering and pagination.
- */
 const getEvents = async (queryOptions) => {
   return eventsRepository.findEvents(queryOptions);
 };
 
-/**
- * Get event details by ID.
- */
 const getEventById = async (id, currentUserId = null) => {
   const event = await eventsRepository.findById(id, currentUserId);
 
@@ -30,10 +18,6 @@ const getEventById = async (id, currentUserId = null) => {
   return event;
 };
 
-/**
- * Create a new event.
- * Role check: LEAD and DIVISION_HEAD only.
- */
 const createEvent = async (eventData, currentUser) => {
   if (currentUser.role === 'MEMBER') {
     const err = new Error('Forbidden: Members cannot create events.');
@@ -50,10 +34,6 @@ const createEvent = async (eventData, currentUser) => {
   return newEvent;
 };
 
-/**
- * Update an existing event.
- * Permission: LEAD can update any event; DIVISION_HEAD can only update events they created.
- */
 const updateEvent = async (id, fields, currentUser) => {
   const existingEvent = await eventsRepository.findById(id);
 
@@ -78,7 +58,6 @@ const updateEvent = async (id, fields, currentUser) => {
     throw err;
   }
 
-  // Validate start_time and end_time if updated
   const startTime = fields.start_time || existingEvent.start_time;
   const endTime = fields.end_time || existingEvent.end_time;
   if (new Date(endTime) <= new Date(startTime)) {
@@ -92,10 +71,6 @@ const updateEvent = async (id, fields, currentUser) => {
   return updatedEvent;
 };
 
-/**
- * Soft delete an event.
- * Permission: LEAD can delete any event; DIVISION_HEAD can only delete events they created.
- */
 const deleteEvent = async (id, currentUser, ipAddress = null) => {
   const existingEvent = await eventsRepository.findById(id);
 

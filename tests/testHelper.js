@@ -1,8 +1,3 @@
-/**
- * @file testHelper.js
- * @description Helper functions and database setup utilities for automated Jest tests.
- */
-
 const fs = require('fs');
 const path = require('path');
 const { pool, query } = require('../src/config/database');
@@ -11,9 +6,6 @@ const { generateAccessToken } = require('../src/utils/jwt');
 
 let isInitialized = false;
 
-/**
- * Initialize test database schema by executing migrations.
- */
 const initTestDb = async () => {
   if (isInitialized) return;
 
@@ -37,15 +29,11 @@ const initTestDb = async () => {
   }
 };
 
-/**
- * Truncate test tables to ensure clean isolated test runs.
- */
 const cleanTestDb = async () => {
   try {
     await query(`
       TRUNCATE TABLE audit_logs, attendances, registrations, events, users RESTART IDENTITY CASCADE;
     `);
-    // Ensure divisions exist
     await query(`
       INSERT INTO divisions (name) VALUES 
         ('Web Development'), 
@@ -66,13 +54,9 @@ const cleanTestDb = async () => {
       ON CONFLICT (name) DO NOTHING;
     `);
   } catch (err) {
-    // If DB is offline, ignore error during clean
   }
 };
 
-/**
- * Create a test user with a specified role and return user data + JWT token.
- */
 const createTestUser = async ({
   email = `test-${Date.now()}-${Math.random().toString(36).substring(7)}@test.com`,
   name = 'Test User',
@@ -97,9 +81,6 @@ const createTestUser = async ({
   return { user, token };
 };
 
-/**
- * Create a test event.
- */
 const createTestEvent = async ({
   title = 'Test Event',
   quota = 10,

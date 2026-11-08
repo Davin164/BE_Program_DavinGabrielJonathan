@@ -1,14 +1,5 @@
-/**
- * @file members.repository.js
- * @description Database access layer for users and members table.
- * All queries are strictly parameterized with SQL injection protections.
- */
-
 const { query } = require('../../config/database');
 
-/**
- * Retrieve paginated list of members with filtering and sorting.
- */
 const findMembers = async ({
   page = 1,
   limit = 10,
@@ -22,7 +13,6 @@ const findMembers = async ({
   const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10)));
   const offset = (pageNum - 1) * limitNum;
 
-  // Whitelist sort fields and order directions to strictly prevent SQL injection
   const allowedSorts = ['name', 'email', 'role', 'created_at'];
   const allowedOrders = ['asc', 'desc'];
   const safeSort = allowedSorts.includes(sort) ? sort : 'created_at';
@@ -44,7 +34,6 @@ const findMembers = async ({
     whereClause += ` AND u.division_id = $${params.length}`;
   }
 
-  // Count total matching records for pagination metadata
   const countQuery = `
     SELECT COUNT(*) AS total
     FROM users u
@@ -53,7 +42,6 @@ const findMembers = async ({
   const countResult = await query(countQuery, params);
   const total = parseInt(countResult.rows[0].total, 10);
 
-  // Retrieve paginated records
   const queryParams = [...params, limitNum, offset];
   const selectQuery = `
     SELECT u.id, u.email, u.name, u.role, u.nim, u.phone, u.division_id, u.created_at, u.updated_at,
@@ -76,9 +64,6 @@ const findMembers = async ({
   };
 };
 
-/**
- * Find user by ID (active or inactive).
- */
 const findById = async (id) => {
   const result = await query(
     `SELECT u.id, u.email, u.name, u.role, u.nim, u.phone, u.division_id, u.is_deleted, u.deleted_at, u.created_at, u.updated_at,
@@ -91,9 +76,6 @@ const findById = async (id) => {
   return result.rows[0] || null;
 };
 
-/**
- * Find user by email.
- */
 const findByEmail = async (email) => {
   const result = await query(
     'SELECT id, email, is_deleted FROM users WHERE email = $1',
@@ -102,9 +84,6 @@ const findByEmail = async (email) => {
   return result.rows[0] || null;
 };
 
-/**
- * Create a new user record.
- */
 const create = async ({ name, email, password_hash, role, division_id, nim, phone }) => {
   const result = await query(
     `INSERT INTO users (email, name, password_hash, role, division_id, nim, phone)
@@ -115,9 +94,6 @@ const create = async ({ name, email, password_hash, role, division_id, nim, phon
   return result.rows[0];
 };
 
-/**
- * Update member profile fields.
- */
 const updateProfile = async (id, fields) => {
   const keys = Object.keys(fields).filter((k) =>
     ['name', 'nim', 'phone', 'division_id'].includes(k) && fields[k] !== undefined
@@ -147,9 +123,6 @@ const updateProfile = async (id, fields) => {
   return result.rows[0] || null;
 };
 
-/**
- * Update user role.
- */
 const updateRole = async (id, newRole) => {
   const sql = `
     UPDATE users
@@ -161,9 +134,6 @@ const updateRole = async (id, newRole) => {
   return result.rows[0] || null;
 };
 
-/**
- * Soft delete user.
- */
 const softDelete = async (id) => {
   const sql = `
     UPDATE users
