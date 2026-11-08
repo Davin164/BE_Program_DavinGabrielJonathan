@@ -93,7 +93,7 @@ Database seed telah menyediakan akun pengujian untuk 7 Role resmi GDGoC UNSRI:
 | **TREASURER_2** | `treas2.gdgoc@gmail.com` | `Password123!` | Public Relation |
 | **CORE_TEAM** | `core.tech@gmail.com` | `Password123!` | Web Development |
 | **CORE_TEAM (ML)** | `core.ml@gmail.com` | `Password123!` | Machine Learning |
-| **MEMBER (Davin)** | `davingabrieljonathan@gmail.com` | `Password123!` | Web Development |
+| **MEMBER (Davin)** | `davin4@gmail.com` | `Password123!` | Web Development |
 | **MEMBER (Siti)** | `member.gdgoc@gmail.com` | `Password123!` | UI/UX |
 
 ---

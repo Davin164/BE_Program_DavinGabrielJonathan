@@ -110,7 +110,7 @@ const seed = async () => {
         phone: '082222222223',
       },
       {
-        email: 'davingabrieljonathan@gmail.com',
+        email: 'davin4@gmail.com',
         name: 'Davin Gabriel Jonathan',
         role: 'MEMBER',
         division_id: divisionMap['Web Development'],
@@ -215,7 +215,7 @@ const seed = async () => {
     console.log('  TREASURER 1 : treas1.gdgoc@gmail.com');
     console.log('  TREASURER 2 : treas2.gdgoc@gmail.com');
     console.log('  CORE_TEAM   : core.tech@gmail.com (Web Dev) & core.ml@gmail.com (ML)');
-    console.log('  MEMBER      : davingabrieljonathan@gmail.com & member.gdgoc@gmail.com');
+    console.log('  MEMBER      : davin4@gmail.com & member.gdgoc@gmail.com');
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Seeding failed:', err.message);
