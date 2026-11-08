@@ -33,6 +33,19 @@ const register = async ({ email, password, name, nim = null, phone = null, divis
 
   const passwordHash = await hashPassword(password);
 
+  let validDivisionId = null;
+  if (division_id) {
+    const divCheck = await query('SELECT id FROM divisions WHERE id = $1', [division_id]);
+    if (divCheck.rows.length > 0) {
+      validDivisionId = division_id;
+    } else {
+      const err = new Error('Divisi tidak ditemukan. Silakan pilih divisi yang valid atau kosongkan.');
+      err.statusCode = 400;
+      err.code = 'INVALID_DIVISION';
+      throw err;
+    }
+  }
+
   const insertQuery = `
     INSERT INTO users (
       email,
@@ -46,7 +59,7 @@ const register = async ({ email, password, name, nim = null, phone = null, divis
     VALUES ($1, $2, $3, 'MEMBER', $4, $5, $6)
     RETURNING id, email, name, role, division_id, nim, phone, created_at;
   `;
-  const insertValues = [email, name, passwordHash, division_id || null, nim || null, phone || null];
+  const insertValues = [email, name, passwordHash, validDivisionId, nim || null, phone || null];
   const result = await query(insertQuery, insertValues);
   const user = result.rows[0];
 

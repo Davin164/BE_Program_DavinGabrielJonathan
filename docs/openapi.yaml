@@ -220,7 +220,7 @@ paths:
                 email: { type: string, format: email }
                 password: { type: string, minLength: 6 }
                 role: { type: string, enum: [LEAD, DIVISION_HEAD, MEMBER] }
-                division_id: { type: string, format: uuid }
+                division_id: { type: string, nullable: true, example: null, description: "UUID divisi opsional (ambil dari GET /api/divisions atau null)" }
                 nim: { type: string }
                 phone: { type: string }
       responses:
@@ -646,7 +646,7 @@ components:
         name: { type: string, example: "Davin Gabriel Jonathan" }
         nim: { type: string, example: "09021282126045" }
         phone: { type: string, example: "081234567890" }
-        division_id: { type: string, format: uuid }
+        division_id: { type: string, nullable: true, example: null, description: "UUID divisi opsional (ambil dari GET /api/divisions atau null)" }
 
     LoginRequest:
       type: object
@@ -703,7 +703,7 @@ components:
         name: { type: string }
         phone: { type: string }
         nim: { type: string }
-        division_id: { type: string, format: uuid }
+        division_id: { type: string, nullable: true, example: null, description: "UUID divisi opsional (ambil dari GET /api/divisions atau null)" }
 
     CreateEventRequest:
       type: object

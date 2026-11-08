@@ -13,8 +13,16 @@ const isLocalDb =
   env.DATABASE_URL.includes('127.0.0.1') ||
   env.DATABASE_URL.includes('@db:');
 
+if (!isLocalDb) {
+  // Supabase PostgreSQL pooler uses self-signed / intermediate certificates
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
+// Strip query parameters from connection string so pg doesn't override explicit ssl settings
+const cleanConnectionString = env.DATABASE_URL.replace(/[?&]sslmode=[^&]+/g, '');
+
 const pool = new Pool({
-  connectionString: env.DATABASE_URL,
+  connectionString: cleanConnectionString,
   ssl: isLocalDb ? false : { rejectUnauthorized: false },
   max: process.env.VERCEL ? 3 : 20,
   idleTimeoutMillis: 30000,
