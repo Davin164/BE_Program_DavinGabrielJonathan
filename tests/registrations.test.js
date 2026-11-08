@@ -34,9 +34,6 @@ describe('Event Registrations & Concurrency Quota Tests', () => {
     token3 = u3.token;
   });
 
-  afterAll(async () => {
-    await pool.end();
-  });
 
   beforeEach(async () => {
     // Create an event with quota = 1 before each race test

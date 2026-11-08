@@ -26,9 +26,6 @@ describe('Events Module Tests', () => {
     memberToken = member.token;
   });
 
-  afterAll(async () => {
-    await pool.end();
-  });
 
   describe('POST /api/events', () => {
     it('should forbid a MEMBER from creating an event', async () => {

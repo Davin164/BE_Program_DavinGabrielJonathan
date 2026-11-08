@@ -22,9 +22,6 @@ describe('Auth Module & Role Authorization Tests', () => {
     leadToken = lead.token;
   });
 
-  afterAll(async () => {
-    await pool.end();
-  });
 
   describe('POST /api/auth/register', () => {
     it('should successfully register a new member with default role MEMBER', async () => {

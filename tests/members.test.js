@@ -29,9 +29,6 @@ describe('Members Module & IDOR Security Tests', () => {
     member2Token = m2.token;
   });
 
-  afterAll(async () => {
-    await pool.end();
-  });
 
   describe('GET /api/members', () => {
     it('should retrieve a paginated list of active members', async () => {

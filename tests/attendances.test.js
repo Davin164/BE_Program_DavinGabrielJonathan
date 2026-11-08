@@ -49,9 +49,6 @@ describe('Event Attendance & Idempotency Tests', () => {
     futureEventId = futureEv.id;
   });
 
-  afterAll(async () => {
-    await pool.end();
-  });
 
   it('should reject check-in if user is not registered for the event', async () => {
     const res = await request(app)
