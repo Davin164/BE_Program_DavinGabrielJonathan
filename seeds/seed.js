@@ -18,9 +18,18 @@ const seed = async () => {
     // 1. Ensure divisions exist
     const divisionsQuery = `
       INSERT INTO divisions (name, description) VALUES
-        ('Core Team', 'Strategic planning and chapter leadership'),
-        ('Technical Division', 'Software engineering, AI/ML, web, mobile, and cloud development'),
-        ('Non-Technical Division', 'Creative UI/UX design, marketing, media, and event logistics')
+        ('Machine Learning', 'AI, Deep Learning, computer vision, NLP, and predictive modeling'),
+        ('Cyber Security', 'Network defense, application security, ethical hacking, and digital forensics'),
+        ('Game Development', 'Game design, 2D/3D graphics, Unity/Unreal mechanics, and game logic'),
+        ('Mobile Development', 'Android, Kotlin, Flutter, and cross-platform mobile apps'),
+        ('Web Development', 'Full-stack web applications, React, Node.js, and modern cloud stacks'),
+        ('UI/UX', 'User experience research, wireframing, and Figma design systems'),
+        ('Project Management', 'Agile sprints, scrum workflows, and project lifecycle management'),
+        ('Human Resource', 'Member recruitment, talent development, and internal bonding'),
+        ('Public Relation', 'Community outreach, partnership networking, and campus communications'),
+        ('Creative Design', 'Visual assets, event branding, posters, and graphic design'),
+        ('Videography', 'Video production, cinematic documentation, and motion graphics'),
+        ('Copywriting', 'Content writing, social media captions, storytelling, and publications')
       ON CONFLICT (name) DO NOTHING;
     `;
     await client.query(divisionsQuery);
@@ -41,7 +50,7 @@ const seed = async () => {
         email: 'lead.gdgoc@gmail.com',
         name: 'Lead Admin',
         role: 'LEAD',
-        division_id: divisionMap['Core Team'],
+        division_id: divisionMap['Project Management'],
         nim: '09021282100001',
         phone: '081111111111',
       },
@@ -49,47 +58,63 @@ const seed = async () => {
         email: 'colead.gdgoc@gmail.com',
         name: 'Co-Lead Admin',
         role: 'CO_LEAD',
-        division_id: divisionMap['Core Team'],
+        division_id: divisionMap['Human Resource'],
         nim: '09021282100002',
         phone: '081111111112',
       },
       {
-        email: 'secretary.gdgoc@gmail.com',
-        name: 'Secretary Core',
-        role: 'SECRETARY',
-        division_id: divisionMap['Core Team'],
+        email: 'sec1.gdgoc@gmail.com',
+        name: 'Secretary 1',
+        role: 'SECRETARY_1',
+        division_id: divisionMap['Public Relation'],
         nim: '09021282100003',
         phone: '081111111113',
       },
       {
-        email: 'treasurer.gdgoc@gmail.com',
-        name: 'Treasurer Core',
-        role: 'TREASURER',
-        division_id: divisionMap['Core Team'],
+        email: 'sec2.gdgoc@gmail.com',
+        name: 'Secretary 2',
+        role: 'SECRETARY_2',
+        division_id: divisionMap['Copywriting'],
         nim: '09021282100004',
         phone: '081111111114',
       },
       {
-        email: 'tech.gdgoc@gmail.com',
-        name: 'Technical Officer',
-        role: 'TECHNICAL_DIVISION',
-        division_id: divisionMap['Technical Division'],
+        email: 'treas1.gdgoc@gmail.com',
+        name: 'Treasurer 1',
+        role: 'TREASURER_1',
+        division_id: divisionMap['Project Management'],
         nim: '09021282100005',
+        phone: '081111111115',
+      },
+      {
+        email: 'treas2.gdgoc@gmail.com',
+        name: 'Treasurer 2',
+        role: 'TREASURER_2',
+        division_id: divisionMap['Public Relation'],
+        nim: '09021282100006',
+        phone: '081111111116',
+      },
+      {
+        email: 'core.tech@gmail.com',
+        name: 'Core Team (Web Dev)',
+        role: 'CORE_TEAM',
+        division_id: divisionMap['Web Development'],
+        nim: '09021282100007',
         phone: '082222222222',
       },
       {
-        email: 'nontech.gdgoc@gmail.com',
-        name: 'Non-Technical Officer',
-        role: 'NON_TECHNICAL_DIVISION',
-        division_id: divisionMap['Non-Technical Division'],
-        nim: '09021282100006',
-        phone: '083333333333',
+        email: 'core.ml@gmail.com',
+        name: 'Core Team (Machine Learning)',
+        role: 'CORE_TEAM',
+        division_id: divisionMap['Machine Learning'],
+        nim: '09021282100008',
+        phone: '082222222223',
       },
       {
         email: 'davingabrieljonathan@gmail.com',
         name: 'Davin Gabriel Jonathan',
         role: 'MEMBER',
-        division_id: divisionMap['Technical Division'],
+        division_id: divisionMap['Web Development'],
         nim: '09021282126045',
         phone: '081234567890',
       },
@@ -97,7 +122,7 @@ const seed = async () => {
         email: 'member.gdgoc@gmail.com',
         name: 'Siti Nurhaliza',
         role: 'MEMBER',
-        division_id: divisionMap['Non-Technical Division'],
+        division_id: divisionMap['UI/UX'],
         nim: '09021282126046',
         phone: '081234567891',
       },
@@ -124,7 +149,7 @@ const seed = async () => {
     }
 
     const leadId = insertedUsers['lead.gdgoc@gmail.com'];
-    const techId = insertedUsers['tech.gdgoc@gmail.com'];
+    const techId = insertedUsers['core.tech@gmail.com'];
 
     // 4. Upsert Sample Events (1 completed + 2 upcoming)
     const now = new Date();
@@ -184,14 +209,14 @@ const seed = async () => {
     await client.query('COMMIT');
     console.log('Seeding completed successfully!');
     console.log('Test Accounts (Password: Password123!):');
-    console.log('  LEAD                   : lead.gdgoc@gmail.com');
-    console.log('  CO_LEAD                : colead.gdgoc@gmail.com');
-    console.log('  SECRETARY              : secretary.gdgoc@gmail.com');
-    console.log('  TREASURER              : treasurer.gdgoc@gmail.com');
-    console.log('  TECHNICAL_DIVISION     : tech.gdgoc@gmail.com');
-    console.log('  NON_TECHNICAL_DIVISION : nontech.gdgoc@gmail.com');
-    console.log('  MEMBER                 : davingabrieljonathan@gmail.com');
-    console.log('  MEMBER 2               : member.gdgoc@gmail.com');
+    console.log('  LEAD        : lead.gdgoc@gmail.com');
+    console.log('  CO_LEAD     : colead.gdgoc@gmail.com');
+    console.log('  SECRETARY 1 : sec1.gdgoc@gmail.com');
+    console.log('  SECRETARY 2 : sec2.gdgoc@gmail.com');
+    console.log('  TREASURER 1 : treas1.gdgoc@gmail.com');
+    console.log('  TREASURER 2 : treas2.gdgoc@gmail.com');
+    console.log('  CORE_TEAM   : core.tech@gmail.com (Web Dev) & core.ml@gmail.com (ML)');
+    console.log('  MEMBER      : davingabrieljonathan@gmail.com & member.gdgoc@gmail.com');
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Seeding failed:', err.message);

@@ -2,10 +2,11 @@ DO $$ BEGIN
   CREATE TYPE user_role AS ENUM (
     'LEAD',
     'CO_LEAD',
-    'SECRETARY',
-    'TREASURER',
-    'TECHNICAL_DIVISION',
-    'NON_TECHNICAL_DIVISION',
+    'SECRETARY_1',
+    'SECRETARY_2',
+    'TREASURER_1',
+    'TREASURER_2',
+    'CORE_TEAM',
     'MEMBER'
   );
 EXCEPTION

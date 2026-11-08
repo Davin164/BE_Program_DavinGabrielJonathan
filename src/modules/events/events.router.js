@@ -22,10 +22,11 @@ const router = Router();
 const CORE_ROLES = [
   'LEAD',
   'CO_LEAD',
-  'SECRETARY',
-  'TREASURER',
-  'TECHNICAL_DIVISION',
-  'NON_TECHNICAL_DIVISION',
+  'SECRETARY_1',
+  'SECRETARY_2',
+  'TREASURER_1',
+  'TREASURER_2',
+  'CORE_TEAM',
 ];
 
 // Public / Semi-public event exploration (optionalAuth identifies caller if logged in)

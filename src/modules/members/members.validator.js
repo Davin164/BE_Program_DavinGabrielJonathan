@@ -8,10 +8,11 @@ const { query, body, param } = require('express-validator');
 const VALID_ROLES = [
   'LEAD',
   'CO_LEAD',
-  'SECRETARY',
-  'TREASURER',
-  'TECHNICAL_DIVISION',
-  'NON_TECHNICAL_DIVISION',
+  'SECRETARY_1',
+  'SECRETARY_2',
+  'TREASURER_1',
+  'TREASURER_2',
+  'CORE_TEAM',
   'MEMBER',
 ];
 

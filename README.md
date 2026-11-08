@@ -85,14 +85,16 @@ Database seed telah menyediakan akun pengujian untuk 7 Role resmi GDGoC UNSRI:
 
 | Role | Email | Password | Divisi |
 | :--- | :--- | :--- | :--- |
-| **LEAD** | `lead.gdgoc@gmail.com` | `Password123!` | Core Team |
-| **CO_LEAD** | `colead.gdgoc@gmail.com` | `Password123!` | Core Team |
-| **SECRETARY** | `secretary.gdgoc@gmail.com` | `Password123!` | Core Team |
-| **TREASURER** | `treasurer.gdgoc@gmail.com` | `Password123!` | Core Team |
-| **TECHNICAL_DIVISION** | `tech.gdgoc@gmail.com` | `Password123!` | Technical Division |
-| **NON_TECHNICAL_DIVISION** | `nontech.gdgoc@gmail.com` | `Password123!` | Non-Technical Division |
-| **MEMBER** | `davingabrieljonathan@gmail.com` | `Password123!` | Technical Division |
-| **MEMBER (Secondary)** | `member.gdgoc@gmail.com` | `Password123!` | Non-Technical Division |
+| **LEAD** | `lead.gdgoc@gmail.com` | `Password123!` | Project Management |
+| **CO_LEAD** | `colead.gdgoc@gmail.com` | `Password123!` | Human Resource |
+| **SECRETARY_1** | `sec1.gdgoc@gmail.com` | `Password123!` | Public Relation |
+| **SECRETARY_2** | `sec2.gdgoc@gmail.com` | `Password123!` | Copywriting |
+| **TREASURER_1** | `treas1.gdgoc@gmail.com` | `Password123!` | Project Management |
+| **TREASURER_2** | `treas2.gdgoc@gmail.com` | `Password123!` | Public Relation |
+| **CORE_TEAM** | `core.tech@gmail.com` | `Password123!` | Web Development |
+| **CORE_TEAM (ML)** | `core.ml@gmail.com` | `Password123!` | Machine Learning |
+| **MEMBER (Davin)** | `davingabrieljonathan@gmail.com` | `Password123!` | Web Development |
+| **MEMBER (Siti)** | `member.gdgoc@gmail.com` | `Password123!` | UI/UX |
 
 ---
 
