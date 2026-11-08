@@ -15,7 +15,7 @@ const seed = async () => {
   try {
     await client.query('BEGIN');
 
-    // 1. Ensure divisions exist
+    // Data divisi
     const divisionsQuery = `
       INSERT INTO divisions (name, description) VALUES
         ('Machine Learning', 'AI, Deep Learning, computer vision, NLP, and predictive modeling'),
@@ -41,10 +41,9 @@ const seed = async () => {
       divisionMap[row.name] = row.id;
     });
 
-    // 2. Hash shared password for seed accounts
     const passwordHash = await bcrypt.hash('Password123!', env.BCRYPT_ROUNDS);
 
-    // 3. Upsert Users for each Role Tier
+    // Akun default untuk setiap tier role
     const users = [
       {
         email: 'lead.gdgoc@gmail.com',
@@ -151,7 +150,7 @@ const seed = async () => {
     const leadId = insertedUsers['lead.gdgoc@gmail.com'];
     const techId = insertedUsers['core.tech@gmail.com'];
 
-    // 4. Upsert Sample Events (1 completed + 2 upcoming)
+    // Sample events (1 selesai, 2 upcoming)
     const now = new Date();
     const pastEventStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const pastEventEnd = new Date(pastEventStart.getTime() + 3 * 60 * 60 * 1000);

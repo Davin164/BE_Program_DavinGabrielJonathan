@@ -28,7 +28,7 @@ describe('Event Attendance & Idempotency Tests', () => {
     memberId = member.user.id;
     memberToken = member.token;
 
-    // 1. Create an active event (started 1 hour ago, ends 2 hours from now)
+    // Event aktif (sedang berlangsung)
     const activeEv = await createTestEvent({
       title: 'Active Ongoing Workshop',
       quota: 50,
@@ -38,7 +38,7 @@ describe('Event Attendance & Idempotency Tests', () => {
     });
     activeEventId = activeEv.id;
 
-    // 2. Create a future event (starts tomorrow)
+    // Event masa depan (belum dimulai)
     const futureEv = await createTestEvent({
       title: 'Future Workshop',
       quota: 50,
@@ -77,12 +77,12 @@ describe('Event Attendance & Idempotency Tests', () => {
   });
 
   it('should allow check-in for registered user within window and remain idempotent on duplicates', async () => {
-    // 1. Register for active event
+    // Daftar ke event aktif
     await request(app)
       .post(`/api/events/${activeEventId}/register`)
       .set('Authorization', `Bearer ${memberToken}`);
 
-    // 2. First check-in attempt
+    // Check-in pertama
     const res1 = await request(app)
       .post(`/api/events/${activeEventId}/checkin`)
       .set('Authorization', `Bearer ${memberToken}`);
@@ -90,7 +90,7 @@ describe('Event Attendance & Idempotency Tests', () => {
     expect([200, 201]).toContain(res1.status);
     expect(res1.body.success).toBe(true);
 
-    // 3. Second check-in attempt (duplicate / idempotent)
+    // Check-in kedua (duplikat idempoten)
     const res2 = await request(app)
       .post(`/api/events/${activeEventId}/checkin`)
       .set('Authorization', `Bearer ${memberToken}`);
@@ -99,7 +99,7 @@ describe('Event Attendance & Idempotency Tests', () => {
     expect(res2.body.success).toBe(true);
     expect(res2.body.data.alreadyCheckedIn).toBe(true);
 
-    // 4. Verify exactly 1 attendance row in database
+    // Data di database tetap tepat 1 baris
     const count = await query(
       'SELECT COUNT(*)::int AS count FROM attendances WHERE user_id = $1 AND event_id = $2',
       [memberId, activeEventId]
