@@ -48,6 +48,16 @@ const errorHandler = (err, req, res, next) => { // eslint-disable-line no-unused
     return error(res, 'Invalid ID format provided.', 400, 'INVALID_ID_FORMAT');
   }
 
+  // PostgreSQL connection errors (ECONNREFUSED, ENOTFOUND, 28P01 password authentication failed)
+  if (err.code === 'ECONNREFUSED' || err.code === 'ENOTFOUND' || err.code === '28P01' || err.code === 'ETIMEDOUT') {
+    return error(
+      res,
+      'Database connection failed. Please ensure DATABASE_URL is properly configured with valid credentials.',
+      503,
+      'DATABASE_UNAVAILABLE'
+    );
+  }
+
   // Known custom application errors (with statusCode)
   if (err.statusCode) {
     return error(res, err.message, err.statusCode, err.code || null);

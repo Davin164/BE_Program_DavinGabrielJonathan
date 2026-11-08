@@ -9,6 +9,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const env = require('./config/env');
+const { query } = require('./config/database');
 const { apiLimiter } = require('./middleware/rateLimiter');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
 
@@ -79,8 +80,29 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get('/api/health', async (req, res) => {
+  try {
+    const dbRes = await query('SELECT NOW() as now, current_database() as db');
+    res.status(200).json({
+      status: 'ok',
+      database: 'connected',
+      db: dbRes.rows[0].db,
+      timestamp: dbRes.rows[0].now,
+    });
+  } catch (err) {
+    const isConfigured = Boolean(process.env.DATABASE_URL);
+    res.status(503).json({
+      status: 'error',
+      database: 'disconnected',
+      error: err.message,
+      code: err.code || null,
+      db_url_configured: isConfigured,
+      db_url_target: isConfigured
+        ? process.env.DATABASE_URL.replace(/:[^:@]*@/, ':****@')
+        : 'fallback localhost (DATABASE_URL not set in environment)',
+      timestamp: new Date().toISOString(),
+    });
+  }
 });
 
 // OpenAPI YAML specification endpoint
