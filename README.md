@@ -85,14 +85,14 @@ Database seed telah menyediakan akun pengujian untuk 7 Role resmi GDGoC UNSRI:
 
 | Role | Email | Password | Divisi |
 | :--- | :--- | :--- | :--- |
-| **LEAD** | `lead@gdgoc.unsri.ac.id` | `Password123!` | Core Team |
-| **CO_LEAD** | `colead@gdgoc.unsri.ac.id` | `Password123!` | Core Team |
-| **SECRETARY** | `secretary@gdgoc.unsri.ac.id` | `Password123!` | Core Team |
-| **TREASURER** | `treasurer@gdgoc.unsri.ac.id` | `Password123!` | Core Team |
-| **TECHNICAL_DIVISION** | `tech@gdgoc.unsri.ac.id` | `Password123!` | Technical Division |
-| **NON_TECHNICAL_DIVISION** | `nontech@gdgoc.unsri.ac.id` | `Password123!` | Non-Technical Division |
-| **MEMBER** | `davin@gdgoc.unsri.ac.id` | `Password123!` | Technical Division |
-| **MEMBER (Secondary)** | `member2@gdgoc.unsri.ac.id` | `Password123!` | Non-Technical Division |
+| **LEAD** | `lead.gdgoc@gmail.com` | `Password123!` | Core Team |
+| **CO_LEAD** | `colead.gdgoc@gmail.com` | `Password123!` | Core Team |
+| **SECRETARY** | `secretary.gdgoc@gmail.com` | `Password123!` | Core Team |
+| **TREASURER** | `treasurer.gdgoc@gmail.com` | `Password123!` | Core Team |
+| **TECHNICAL_DIVISION** | `tech.gdgoc@gmail.com` | `Password123!` | Technical Division |
+| **NON_TECHNICAL_DIVISION** | `nontech.gdgoc@gmail.com` | `Password123!` | Non-Technical Division |
+| **MEMBER** | `davingabrieljonathan@gmail.com` | `Password123!` | Technical Division |
+| **MEMBER (Secondary)** | `member.gdgoc@gmail.com` | `Password123!` | Non-Technical Division |
 
 ---
 

@@ -38,7 +38,7 @@ const seed = async () => {
     // 3. Upsert Users for each Role Tier
     const users = [
       {
-        email: 'lead@gdgoc.unsri.ac.id',
+        email: 'lead.gdgoc@gmail.com',
         name: 'Lead Admin',
         role: 'LEAD',
         division_id: divisionMap['Core Team'],
@@ -46,7 +46,7 @@ const seed = async () => {
         phone: '081111111111',
       },
       {
-        email: 'colead@gdgoc.unsri.ac.id',
+        email: 'colead.gdgoc@gmail.com',
         name: 'Co-Lead Admin',
         role: 'CO_LEAD',
         division_id: divisionMap['Core Team'],
@@ -54,7 +54,7 @@ const seed = async () => {
         phone: '081111111112',
       },
       {
-        email: 'secretary@gdgoc.unsri.ac.id',
+        email: 'secretary.gdgoc@gmail.com',
         name: 'Secretary Core',
         role: 'SECRETARY',
         division_id: divisionMap['Core Team'],
@@ -62,7 +62,7 @@ const seed = async () => {
         phone: '081111111113',
       },
       {
-        email: 'treasurer@gdgoc.unsri.ac.id',
+        email: 'treasurer.gdgoc@gmail.com',
         name: 'Treasurer Core',
         role: 'TREASURER',
         division_id: divisionMap['Core Team'],
@@ -70,7 +70,7 @@ const seed = async () => {
         phone: '081111111114',
       },
       {
-        email: 'tech@gdgoc.unsri.ac.id',
+        email: 'tech.gdgoc@gmail.com',
         name: 'Technical Officer',
         role: 'TECHNICAL_DIVISION',
         division_id: divisionMap['Technical Division'],
@@ -78,7 +78,7 @@ const seed = async () => {
         phone: '082222222222',
       },
       {
-        email: 'nontech@gdgoc.unsri.ac.id',
+        email: 'nontech.gdgoc@gmail.com',
         name: 'Non-Technical Officer',
         role: 'NON_TECHNICAL_DIVISION',
         division_id: divisionMap['Non-Technical Division'],
@@ -86,7 +86,7 @@ const seed = async () => {
         phone: '083333333333',
       },
       {
-        email: 'davin@gdgoc.unsri.ac.id',
+        email: 'davingabrieljonathan@gmail.com',
         name: 'Davin Gabriel Jonathan',
         role: 'MEMBER',
         division_id: divisionMap['Technical Division'],
@@ -94,7 +94,7 @@ const seed = async () => {
         phone: '081234567890',
       },
       {
-        email: 'member2@gdgoc.unsri.ac.id',
+        email: 'member.gdgoc@gmail.com',
         name: 'Siti Nurhaliza',
         role: 'MEMBER',
         division_id: divisionMap['Non-Technical Division'],
@@ -123,8 +123,8 @@ const seed = async () => {
       insertedUsers[u.email] = userRes.rows[0].id;
     }
 
-    const leadId = insertedUsers['lead@gdgoc.unsri.ac.id'];
-    const techId = insertedUsers['tech@gdgoc.unsri.ac.id'];
+    const leadId = insertedUsers['lead.gdgoc@gmail.com'];
+    const techId = insertedUsers['tech.gdgoc@gmail.com'];
 
     // 4. Upsert Sample Events (1 completed + 2 upcoming)
     const now = new Date();
@@ -184,14 +184,14 @@ const seed = async () => {
     await client.query('COMMIT');
     console.log('Seeding completed successfully!');
     console.log('Test Accounts (Password: Password123!):');
-    console.log('  LEAD                   : lead@gdgoc.unsri.ac.id');
-    console.log('  CO_LEAD                : colead@gdgoc.unsri.ac.id');
-    console.log('  SECRETARY              : secretary@gdgoc.unsri.ac.id');
-    console.log('  TREASURER              : treasurer@gdgoc.unsri.ac.id');
-    console.log('  TECHNICAL_DIVISION     : tech@gdgoc.unsri.ac.id');
-    console.log('  NON_TECHNICAL_DIVISION : nontech@gdgoc.unsri.ac.id');
-    console.log('  MEMBER                 : davin@gdgoc.unsri.ac.id');
-    console.log('  MEMBER 2               : member2@gdgoc.unsri.ac.id');
+    console.log('  LEAD                   : lead.gdgoc@gmail.com');
+    console.log('  CO_LEAD                : colead.gdgoc@gmail.com');
+    console.log('  SECRETARY              : secretary.gdgoc@gmail.com');
+    console.log('  TREASURER              : treasurer.gdgoc@gmail.com');
+    console.log('  TECHNICAL_DIVISION     : tech.gdgoc@gmail.com');
+    console.log('  NON_TECHNICAL_DIVISION : nontech.gdgoc@gmail.com');
+    console.log('  MEMBER                 : davingabrieljonathan@gmail.com');
+    console.log('  MEMBER 2               : member.gdgoc@gmail.com');
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Seeding failed:', err.message);
