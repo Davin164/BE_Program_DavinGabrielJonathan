@@ -16,7 +16,7 @@ const isLocalDb =
 const pool = new Pool({
   connectionString: env.DATABASE_URL,
   ssl: isLocalDb ? false : { rejectUnauthorized: false },
-  max: 20,
+  max: process.env.VERCEL ? 3 : 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
 });
