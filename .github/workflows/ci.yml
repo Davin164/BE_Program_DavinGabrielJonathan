@@ -44,9 +44,18 @@ jobs:
           NODE_ENV: test
 
       - name: Run test suite
-        run: npm test
+        run: |
+          npm test -- --verbose 2>&1 | tee test-output.txt
         env:
           DATABASE_URL: postgresql://postgres:testpass@localhost:5432/gdgoc_test
           JWT_SECRET: test-secret-key-minimum-32-chars-long-12345
           JWT_REFRESH_SECRET: test-refresh-secret-minimum-32-chars-long-67890
           NODE_ENV: test
+
+      - name: Publish Test Summary
+        if: always()
+        run: |
+          echo "## Jest Test Results" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat test-output.txt >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
