@@ -55,7 +55,7 @@ const swaggerHtml = `<!DOCTYPE html>
 <body>
   <div class="custom-banner">
     <div class="brand">
-      <span>🚀 GDGoC UNSRI Management System — REST API</span>
+      <span>GDGoC UNSRI Management System — REST API</span>
     </div>
     <div class="nav-links">
       <a href="/openapi.yaml" target="_blank" download="openapi.yaml">Download OpenAPI YAML</a>
@@ -85,3 +85,4 @@ const swaggerHtml = `<!DOCTYPE html>
 </html>`;
 
 module.exports = swaggerHtml;
+

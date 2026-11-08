@@ -10,6 +10,10 @@ info:
     email: davin@gdgoc.unsri.ac.id
 
 servers:
+  - url: /
+    description: Current Deployment (Live Server)
+  - url: https://be-program-davin-gabriel-jonathan.vercel.app
+    description: Production Server (Vercel)
   - url: http://localhost:3000
     description: Local Development Server
 
