@@ -1,1 +1,48 @@
+GDGoC UNSRI - TECHNICAL ASSIGNMENT SUBMISSION
+Nama: Davin Gabriel Jonathan
+Divisi: Back-End Developer
+
+1. Repository GitHub (Public)
 https://github.com/Davin164/BE_Program_DavinGabrielJonathan
+
+2. Live Deployment URL (Vercel)
+https://be-program-davin-gabriel-jonathan.vercel.app
+
+3. Interactive API Documentation (Swagger / OpenAPI 3.0)
+URL: https://be-program-davin-gabriel-jonathan.vercel.app/docs
+OpenAPI YAML: https://be-program-davin-gabriel-jonathan.vercel.app/openapi.yaml
+
+4. Supabase BaaS & Database
+Project URL: https://your-project-id.supabase.co
+Anon Key: your-supabase-publishable-key
+
+5. Akun Pengujian (Test Accounts untuk Setiap Role)
+Password untuk seluruh akun uji: Password123!
+
+Role LEAD (Akses Penuh Chapter, Manajemen Anggota & Role, Audit Log)
+Email: lead.gdgoc@gmail.com
+Password: Password123!
+
+Role CORE_TEAM / Div Head (Manajemen Event, Absensi Peserta, Audit Log)
+Email: core.tech@gmail.com
+Password: Password123!
+
+Role MEMBER (Pendaftaran Event, Absensi Mandiri, Profil)
+Email: davin4@gmail.com
+Password: Password123!
+
+6. Cara Menjalankan Secara Lokal
+File konfigurasi .env telah disediakan lengkap di dalam folder proyek ini.
+
+Opsi 1 (Satu Perintah via Docker):
+docker compose up --build
+Aplikasi dan database lokal langsung siap digunakan pada http://localhost:3000
+
+Opsi 2 (Manual Node.js):
+npm install
+npm run migrate
+npm run seed
+npm run dev
+
+Opsi 3 (Automated Test Suite):
+npm test
