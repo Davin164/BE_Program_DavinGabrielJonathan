@@ -13,8 +13,7 @@ URL: https://be-program-davin-gabriel-jonathan.vercel.app/docs
 OpenAPI YAML: https://be-program-davin-gabriel-jonathan.vercel.app/openapi.yaml
 
 4. Supabase BaaS & Database
-Project URL: https://your-project-id.supabase.co
-Anon Key: your-supabase-publishable-key
+Project URL dan Anon Key tersedia di file .env (tidak disimpan di repository).
 
 5. Akun Pengujian (Test Accounts untuk Setiap Role)
 Password untuk seluruh akun uji: Password123!
